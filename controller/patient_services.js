@@ -1,6 +1,8 @@
 const StatusCode = require('http-status-codes')
 const info = require("../schema/info")
-const issue = require("../schema/issue")
+const issue = require("../schema/records")
+
+
 
 
 const getinfo = async (req, res) => {
@@ -27,6 +29,8 @@ const getissue = async (req, res) => {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: err.message })
     }
 }
+
+// const 
 
 module.exports = {
     getinfo,

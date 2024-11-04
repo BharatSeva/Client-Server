@@ -1,6 +1,4 @@
 const mongoose = require("mongoose")
-
-
 const Patient_Problem = new mongoose.Schema({
     issue: {
         type: String,

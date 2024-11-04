@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 
-const JobsSchema = new mongoose.Schema({
+const info = new mongoose.Schema({
     health_id: {
         type: String,
         required: [true, "This field is must"],
@@ -124,4 +124,4 @@ const JobsSchema = new mongoose.Schema({
  
 }, { timestamps: true })
 
-module.exports = mongoose.model('patient_details', JobsSchema);
+module.exports = mongoose.model('patient_details', info);

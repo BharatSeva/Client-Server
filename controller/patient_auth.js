@@ -1,24 +1,27 @@
 const StatusCode = require("http-status-codes")
-const auth = require("../schema/patient_auth")
+const auth = require("../schema/auth")
 const info = require("../schema/info")
 
 // const { GetHealthUserSettingForServer, HealthUserLoginData } = require("../Firebase/Service")
-
+// const pref = require("../database/postgres").pref
 
 const register = async (req, res) => {
     try {
         let { health_id } = req.body
-        const FindUser = await info.findOne({ "health_id": health_id })
+        const FindUser = await info.findOne({ health_id })
         if (!FindUser) {
             res.status(StatusCode.BAD_REQUEST).json({ status: "No User Found With Given Health ID", message: "HealthCare Need To Register You Before You Login.." })
             return;
         }
+        // await new pref();
 
         const IsUser = await auth.findOne({ health_id })
         if (IsUser) {
             res.status(StatusCode.BAD_REQUEST).json({ status: "User Already Registered!" })
             return
         } 
+       
+
         req.body.name = FindUser.fname + " " + FindUser.lname;
         if (FindUser.email === req.body.email) {
             await auth.create(req.body)
