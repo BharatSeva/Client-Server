@@ -1,10 +1,10 @@
 const mongoose = require("mongoose")
 
 const Appoinments = new mongoose.Schema({
-    healthcareID: {
+    health_id: {
         type: String,
-        required: [true, "HealthCare ID is Required"],
-        maxlength: 20
+        required: [true, "Health ID is Required"],
+        maxlength: 30
     },
     appointment_date: {
         type: String,
@@ -14,10 +14,10 @@ const Appoinments = new mongoose.Schema({
         type: String,
         required: [true, "Time Is Required"]
     },
-    health_ID: {
+    healthcare_id: {
         type: String,
-        required: [true, "Health_ID Is Required"],
-        maxlength: 12
+        required: [true, "Healthcare ID Is Required"],
+        maxlength: 30
     },
     department: {
         type: String,
@@ -28,9 +28,9 @@ const Appoinments = new mongoose.Schema({
         type: String,
         maxlength: 30
     },
-    name: {
+    fullname: {
         type: String,
-        required: [true, "HealthUser Name is Required"],
+        required: [true, "Full Name is Required"],
         maxlength: 30
     },
     healthcare_name: {

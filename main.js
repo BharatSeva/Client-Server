@@ -1,7 +1,6 @@
 const express = require('express')
 const app = express()
 app.use(express.json())
-   
  
 
 
@@ -10,12 +9,17 @@ app.use(express.json())
 const PatientRouter_Authorization = require("./router/auth")
 app.use('/api/v1/user/auth', PatientRouter_Authorization)
 
-// // Below Will handle PatientRoutings
+const auth_middleware = require("./middleware/authentication")
+
+const Appointments = require("./router/appointment")
+const services = require("./router/services")
+app.use('/api/v1/user', auth_middleware, Appointments, services) 
+
+
 // const Patient_Authentication = require("./MiddleWare/Patient_Authentication");
 // const Patient = require("./Router/Patient")
 // const PatientBioData = require("./Router/Patient_BioData")
 // const PatientDetails_Router = require("./Router/Patient_Details_Router");
-// const Appointments = require("./Router/AppointsmentRouter")
 // app.use('/api/v1/userdetails', Patient_Authentication, PatientDetails_Router, PatientBioData, Appointments)
 // app.use('/api/v1/user', Patient_Authentication, Patient)
  
