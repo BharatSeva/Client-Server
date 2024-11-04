@@ -15,7 +15,7 @@ const JobsSchema = new mongoose.Schema({
         minlength: [3, "This Field can not be Less than 3 characters"]
     },
     middlename: {
-        type: String,
+        type: String, 
         maxlength: [10, "This Field can not be more than 10 characters"]
     },
     lname: {
@@ -31,15 +31,9 @@ const JobsSchema = new mongoose.Schema({
         maxlength: [5, "This Field can not be more than 10 characters"],
         minlength: [1, "This Field can not be Less than 3 characters"]
     },
-    healthcareId: {
+    healthcare_id: {
         type: Number,
         required: [true, "HealthCare ID is Must to have"]
-    },
-    healthcareName: {
-        type: String,
-        required: [true, "Healthcare Name is Must"],
-        maxlength: [30, "Healthcare Name cannot be more than 30 characters"],
-        minlength: [1, "Healthcare Name cannot be less than 1"]
     },
     dob: {
         type: String,
@@ -53,19 +47,19 @@ const JobsSchema = new mongoose.Schema({
         maxlength: [20, "blood Group cannot be more than 10"],
         minlength: [1, "blood Group cannot be less than 1"]
     },
-    BMI: {
+    bmi: {
         type: String,
         required: [true, "BMI is Must"],
         maxlength: [10, "BMI cannot be more than 10"],
         minlength: [1, "BMI cannot be less than 1"]
     },
-    MarriageStatus: {
+    marriage_status: {
         type: String,
         required: [true, "MarriageStatus is Must"],
         maxlength: [20, "MarriageStatus cannot be more than 10"],
         minlength: [1, "MarriageStatus cannot be less than 1"]
     },
-    Weight: {
+    weight: {
         type: String,
         required: [true, "Weight is Must"],
         maxlength: [10, "Weight cannot be more than 10"],
@@ -84,13 +78,13 @@ const JobsSchema = new mongoose.Schema({
         maxlength: [10, "Mobile Number cannot be more than 10"],
         minlength: [1, "Mobile Number cannot be less than 1"]
     },
-    aadharNumber: {
+    aadhaar_number: {
         type: String,
         required: [true, "Aadhaar is Must"],
         maxlength: [20, "Aadhaar cannot be more than 10"],
         minlength: [1, "Aadhaar cannot be less than 1"]
     },
-    Primarylocation: {
+    primary_location: {
         type: String,
         required: [true, "Location is Must"],
         maxlength: [50, "Location cannot be more than 10"],
@@ -127,7 +121,7 @@ const JobsSchema = new mongoose.Schema({
         maxlength: [10, "emergencynumber cannot be more than 10"],
         minlength: [1, "emergencynumber cannot be less than 1"]
     }
-
+ 
 }, { timestamps: true })
 
 module.exports = mongoose.model('patient_details', JobsSchema);

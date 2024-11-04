@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 require('dotenv').config();
 
 
-const PatientCredentials_Schema = new mongoose.Schema({
+const auth = new mongoose.Schema({
     name: {
         type: String,
         required: [true, "Name Is not Provided"],
@@ -19,7 +19,7 @@ const PatientCredentials_Schema = new mongoose.Schema({
         unique: true
     },
     health_id: {
-        type: Number,
+        type: String,
         required: [true, "Health ID is not provided"],
         unique: true
     },
@@ -31,24 +31,24 @@ const PatientCredentials_Schema = new mongoose.Schema({
 }, { timestamps: true })
 
 
-
-PatientCredentials_Schema.pre('save', async function (next) {
+ 
+auth.pre('save', async function (next) {
     const salt = await bcryptjs.genSalt(10)
     this.password = await bcryptjs.hash(this.password, salt)
     next();
 })
 
-PatientCredentials_Schema.methods.P_createJWT = function () {
+auth.methods.P_createJWT = function () {
     return jwt.sign({ Patient_USERID: this._id, name: this.name, healthId: this.health_id, email: this.email }, process.env.Patient_JWT_SECRET_KEY, {
         expiresIn: process.env.Patient_JWT_LIFETIME,
     })
 }
 
-PatientCredentials_Schema.methods.P_comparePass = async function (password) {
+auth.methods.P_comparePass = async function (password) {
     const isMatch = await bcryptjs.compare(password, this.password)
     return isMatch
 }
 
 
 
-module.exports = mongoose.model("Patient_Credentials", PatientCredentials_Schema)
+module.exports = mongoose.model("patient_auth", auth)
