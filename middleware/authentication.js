@@ -1,36 +1,53 @@
-const jwt = require("jsonwebtoken")
-const StatusCode = require("http-status-codes")
+const jwt = require("jsonwebtoken");
+const StatusCode = require("http-status-codes");
+const Redis = require("ioredis"); 
 require('dotenv').config();
 
-// From Firebase
-// const { IncreaseRequestLimit, GetHealthUserSettingForServer } = require("../Firebase/Service")
-// const { AccountSuspended } = require("../NodeMailer/NodeMessages")
+const redis = new Redis({
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT,
+});
 
+const rateLimiter = async (req, res, next) => {
+    const userKey = `patient:rate_limit:${req.user.health_id}`;
 
-const authentication = async (req, res, next) => {
-    const authHeader = req.headers.authorization
-    if (!authHeader || !authHeader.startsWith("Bearer")) {
-        res.status(StatusCode.UNAUTHORIZED).json({ message: "Invalid Request, Token expired" })
-        return;
-    }
-    const token = authHeader.split(' ')[1];
     try {
-        const patient_payload = jwt.verify(token, process.env.Patient_JWT_SECRET_KEY)
-        req.user = { userID: patient_payload.Patient_USERID, fullname: patient_payload.name, health_id: patient_payload.healthId, email: patient_payload.email }
-        // This One For Rate Limit Checking
-        // let Count = await GetHealthUserSettingForServer(patient_payload.healthId.toString())
-        // if (!Count.Total_request) {
-        //     res.status(StatusCode.METHOD_NOT_ALLOWED).json({ status: "Account Suspended!", message: "Request Blocked Due to Request Limit Reached, Mail to 21vaibahv11@gmail.com to Continue Service!" })
-        //     return
-        // }
-        // if (Count.Total_request == 1) {
-        //     AccountSuspended(patient_payload.name, patient_payload.email)
-        // }
-        // await IncreaseRequestLimit(patient_payload.healthId.toString())
+        const currentRequests = await redis.incr(userKey);
+        if (currentRequests === 1) {
+            await redis.expire(userKey, process.env.WINDOW_SIZE_IN_SECONDS);
+        }
+        if (currentRequests > process.env.MAX_REQUESTS) {
+            return res.status(StatusCode.TOO_MANY_REQUESTS).json({ message: "Too many requests, please try again later." });
+        }
         next();
     } catch (err) {
-        res.status(StatusCode.UNAUTHORIZED).json({ message: err.message })
+        console.error("Rate limiter error:", err);
+        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
     }
-}
+};
 
-module.exports = authentication
+// Authentication Middleware
+const authentication = async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer")) {
+        return res.status(StatusCode.UNAUTHORIZED).json({ message: "Invalid Request, Token expired" });
+    }
+
+    const token = authHeader.split(' ')[1];
+    try {
+        const patient_payload = jwt.verify(token, process.env.Patient_JWT_SECRET_KEY);
+        req.user = {
+            userID: patient_payload.Patient_USERID,
+            fullname: patient_payload.name,
+            health_id: patient_payload.healthId,
+            email: patient_payload.email,
+        };
+
+        // check for ratelimiter also
+        await rateLimiter(req, res, next);
+    } catch (err) {
+        res.status(StatusCode.UNAUTHORIZED).json({ message: err.message });
+    }
+};
+
+module.exports = authentication;

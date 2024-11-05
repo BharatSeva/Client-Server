@@ -1,0 +1,331 @@
+{
+	"info": {
+		"_postman_id": "b8ab989a-67fa-45cb-81b4-b26448c0eb05",
+		"name": "User_Server",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "24259607"
+	},
+	"item": [
+		{
+			"name": "Register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"health_id\":\"{{health_id}}\",\r\n    \"email\":\"{{user_email}}\",\r\n    \"password\":12345    \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:3001/api/v1/user/auth/register"
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();\r",
+							"var token = jsonData.token;\r",
+							"var healthId = jsonData.healthId;\r",
+							"pm.globals.set(\"USER_TOKEN\", token);\r",
+							"pm.globals.set(\"health_id\", healthId);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"health_id\":\"{{health_id}}\",\r\n    \"password\":\"12345\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost/api/v1/user/auth/login"
+			},
+			"response": []
+		},
+		{
+			"name": "Create Appointment",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"healthcare_name\": \"Drew Moore Hospital\",\r\n    \"healthcare_id\": \"HCIDbc18c389-375d-462e-a\",\r\n    \"appointment_date\":\"30-02-2025\",\r\n    \"appointment_time\":\"10:00 AM T0 12:00 PM\",\r\n    \"department\":\"Psycology\",\r\n    \"note\":\"Testing\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost/api/v1/user/appointment/create"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Appointments",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost/api/v1/user/appointment/fetch?limit=2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"appointment",
+						"fetch"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Info",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost/api/v1/user/info"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Issues",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost/api/v1/user/issue"
+			},
+			"response": []
+		},
+		{
+			"name": "Update Preferances",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"view_permission\": false,\r\n    \"locked_account\": false,\r\n    \"email\": \"Every Event\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost/api/v1/user/pref/update"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Preferances",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost/api/v1/user/pref/get"
+			},
+			"response": []
+		},
+		{
+			"name": "Stats",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost/api/v1/user/stats"
+			},
+			"response": []
+		},
+		{
+			"name": "[Logs] Records Viewed",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost/api/v1/user/logs/records/viewed"
+			},
+			"response": []
+		},
+		{
+			"name": "[Logs] Records Created",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost/api/v1/user/logs/records/created"
+			},
+			"response": []
+		},
+		{
+			"name": "[Logs] Biodata Created",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost/api/v1/user/logs/info/created"
+			},
+			"response": []
+		},
+		{
+			"name": "[Logs]  Biodata Viewed",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost/api/v1/user/logs/info/viewed"
+			},
+			"response": []
+		},
+		{
+			"name": "Find Hospital Name",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost/api/v1/user/appointment/healthcare?limit=2&name=moore",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"appointment",
+						"healthcare"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "2"
+						},
+						{
+							"key": "name",
+							"value": "moore"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "health_id",
+			"value": "HIDae6ff23c-a425-49df-a ",
+			"type": "default"
+		}
+	]
+}

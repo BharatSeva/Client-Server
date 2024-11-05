@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    const setting = sequelize.define('healthuser_setting', {
+    return sequelize.define('healthuser_setting', {
         health_id: {
             type: DataTypes.STRING,
             primaryKey: true,
@@ -21,5 +21,4 @@ module.exports = (sequelize, DataTypes) => {
             unique: true,
         }
     });
-    return setting;
 }
