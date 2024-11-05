@@ -1,5 +1,6 @@
 const mongoose = require("mongoose")
 
+
 const Appoinments = new mongoose.Schema({
     health_id: {
         type: String,
