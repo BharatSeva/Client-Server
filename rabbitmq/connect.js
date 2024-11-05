@@ -1,14 +1,16 @@
 const amqp = require('amqplib');
 
 let channel, connection;
-const QUEUE_NAME = 'appointments_queue';
+const APPOINTMENT_QUEUE = 'appointments_queue';
+const LOGIN_QUEUE = 'patient_logs'
 
 const connectRabbitMQ = async (rabbitmqURL) => {
     try {
         connection = await amqp.connect(rabbitmqURL);
         channel = await connection.createChannel();
-        await channel.assertQueue(QUEUE_NAME, { durable: true });
-        console.log(`Connected to RabbitMQ - Queue: ${QUEUE_NAME}`);
+        await channel.assertQueue(APPOINTMENT_QUEUE, { durable: true });
+        await channel.assertQueue(LOGIN_QUEUE, { durable: true });
+        console.log(`Connected to RabbitMQ`);
     } catch (error) {
         console.error("Failed to connect to RabbitMQ:", error);
         process.exit(1);
