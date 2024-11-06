@@ -13,6 +13,7 @@ const get_pref = async (req, res) => {
                 locked_account: false,
                 email: 'Every Event',
             };
+
             pref = await preferances.create({ health_id, ...defaultPreferences });
         }
         res.status(200).json({ preferences: pref });

@@ -25,7 +25,7 @@ const getinfo = async (req, res) => {
     }
 }
 
-const getissue = async (req, res) => {
+const Get_Records = async (req, res) => {
     const validIssues = ["Low", "Moderate", "High", "Severe"];
     let limit = req.query.limit ? parseInt(req.query.limit) : 5;
     const { health_id } = req.user
@@ -36,12 +36,15 @@ const getissue = async (req, res) => {
         let query = { health_id };
         if (severity && validIssues.includes(severity)) {
             query.medical_severity = severity;
+        } else {
+            severity = "N/A"
         }
 
         const records = await issue.find(query).select(["-__v", "-_id"])
             .sort("created_At")
             .limit(limit)
-        res.status(StatusCode.OK).json({ issues: records, issues_fetched: records.length })
+            
+        res.status(StatusCode.OK).json({ issues: records, fetched: records.length, severity: severity })
     }
     catch (err) {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: err.message })
@@ -97,7 +100,7 @@ const viewed_biodata = async (req, res) => {
 
 module.exports = {
     getinfo,
-    getissue,
+    Get_Records,
     viewed_records,
     created_records,
     created_biodata,

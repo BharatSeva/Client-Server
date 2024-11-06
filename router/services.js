@@ -1,9 +1,9 @@
 const express = require("express")
 const router = express.Router()
 
-const { getissue, getinfo, viewed_records, created_records, created_biodata, viewed_biodata } = require("../controller/services")
+const { Get_Records, getinfo, viewed_records, created_records, created_biodata, viewed_biodata } = require("../controller/services")
 router.get('/info', getinfo)
-router.get('/issue', getissue)
+router.get('/issue', Get_Records)
 // fetch logs
 router.get('/logs/records/viewed', viewed_records)
 router.get('/logs/records/created', created_records)

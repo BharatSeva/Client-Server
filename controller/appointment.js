@@ -65,8 +65,6 @@ const GetAppointment = async (req, res) => {
 };
 
 
-
-
 // fetch healthcare infos for appoinments
 const { db } = require("../database/postgres")
 const { Op } = require('sequelize');
@@ -76,6 +74,12 @@ const appoint_infos = db.appoint_info
 const appointment_info = async (req, res) => {
     let limit = req.query.limit ? parseInt(req.query.limit) : 5;
     const { name } = req.query;
+
+    // check wheather the name parameter is present or not
+    let filter = true;
+    if (!name || name.trim() === "") {
+        filter = false;
+    }
     try {
         let info = await appoint_infos.findAll({
             attributes: [
@@ -93,7 +97,7 @@ const appointment_info = async (req, res) => {
                 : null,
             limit: limit != null ? limit : 10
         });
-        res.status(200).json({ healthcare: info, fetched: info.length });
+        res.status(200).json({ healthcare: info, fetched: info.length, filter });
     } catch (err) {
         console.error("Error fetching preferences:", err.message);
         res.status(500).json({ status: 'Could not process your request' });

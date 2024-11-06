@@ -3,6 +3,8 @@ const auth = require("../schema/auth")
 const info = require("../schema/info")
 const { channel, connection } = require("../rabbitmq/connect")
 
+
+// all these logs will puts in comman channel "logs" shared by both User and Healthcare
 const register = async (req, res) => {
     try {
         let { health_id, email } = req.body
@@ -13,7 +15,7 @@ const register = async (req, res) => {
         }
 
         // push into queue for logs
-        const QUEUE_NAME = 'patient_logs';
+        const QUEUE_NAME = 'logs';
         const msgChannel = channel();
         if (!msgChannel) {
             return res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: "RabbitMQ channel is not available." });
@@ -21,7 +23,7 @@ const register = async (req, res) => {
         const payload = {
             email: email,
             health_id: health_id,
-            category: "patient:register",
+            category: "patientRegister",
             // message: "Registeration Detected",
             IP_ADDR: req.ip
         };
@@ -63,7 +65,7 @@ const login = async (req, res) => {
         }
 
         // push into queue for logs
-        const QUEUE_NAME = 'patient_logs';
+        const QUEUE_NAME = 'logs';
         const msgChannel = channel();
         if (!msgChannel) {
             return res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: "RabbitMQ channel is not available." });
@@ -71,7 +73,7 @@ const login = async (req, res) => {
         const payload = {
             health_id: health_id,
             email: Patient.email,
-            category: "patient:login",
+            category: "patientLogin",
             name: Patient.name,
             // message: "Login Detected",
             IP_ADDR: req.ip
