@@ -10,7 +10,7 @@ const getinfo = async (req, res) => {
         if (cache) {
             const { cachedData, ttl } = await Getcaching('info', health_id)
             if (cachedData) {
-                res.status(StatusCode.OK).json({ biodata: cachedData, status: "cache hit", refreshIn: ttl })
+                res.status(StatusCode.OK).json({ biodata: cachedData, refreshIn: ttl + "s" })
                 return
             }
         }

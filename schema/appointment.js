@@ -7,6 +7,17 @@ const Appoinments = new mongoose.Schema({
         required: [true, "Health ID is Required"],
         maxlength: 30
     },
+    status: {
+        type: String,
+        enum: [
+            "Pending",
+            "Confirmed",
+            "Rejected",
+            "Not Available"
+        ],
+        required: [true, "Health ID is Required"],
+        maxlength: 30
+    },
     appointment_date: {
         type: String,
         required: [true, "Date Is Required"]

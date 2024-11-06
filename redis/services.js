@@ -21,7 +21,7 @@ const rateLimiter = async (req, res, next) => {
 
 const Setcaching = async (type, id, data) => {
     const cacheKey = `patient:${type}:${id}`;
-    const expiration = 3600;
+    const expiration = 3600 * 24;
     try {
         await redis.set(cacheKey, JSON.stringify(data), "EX", expiration);
     } catch (error) {
