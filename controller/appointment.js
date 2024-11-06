@@ -35,24 +35,35 @@ const CreateAppointment = async (req, res) => {
     }
 }
 
+
 const GetAppointment = async (req, res) => {
     let limit = req.query.limit ? parseInt(req.query.limit) : 5;
-    const { healthId } = req.user
+    let status = req.query.status;
+    const { health_id } = req.user;
 
     try {
-        const appointments = await Appointment.find({ health_ID: healthId })
+        let query = { health_id };
+        const validStatuses = ["Pending", "Confirmed", "Rejected", "Not Available"];
+        if (status && validStatuses.includes(status)) {
+            query.status = status;
+        }
+
+        // find according to query specified
+        const appointments = await Appointment.find(query)
             .select(['-__v', '-_id'])
             .sort("-appointment_date")
-            .limit(parseInt(limit))
+            .limit(limit);
+
         if (!appointments.length) {
-            res.status(StatusCode.NOT_FOUND).json({ message: "No Any Appointment Log Found !" })
-            return
+            return res.status(StatusCode.NOT_FOUND).json({ message: "No Appointment Log Found!" });
         }
-        res.status(StatusCode.OK).json({ appointments_details: appointments, appointments: appointments.length })
+
+        res.status(StatusCode.OK).json({ appointments_details: appointments, fetched: appointments.length });
     } catch (err) {
-        res.status(StatusCode.BAD_REQUEST).json({ message: err.message })
+        res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
-}
+};
+
 
 
 
@@ -82,7 +93,7 @@ const appointment_info = async (req, res) => {
                 : null,
             limit: limit != null ? limit : 10
         });
-        res.status(200).json({ info: info, fetched: info.length });
+        res.status(200).json({ healthcare: info, fetched: info.length });
     } catch (err) {
         console.error("Error fetching preferences:", err.message);
         res.status(500).json({ status: 'Could not process your request' });

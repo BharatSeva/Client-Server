@@ -96,7 +96,7 @@ const login = async (req, res) => {
         // await HealthUserLoginData(Patient.health_id, req.ip.toString())
 
         res.status(StatusCode.ACCEPTED).json({
-            name: Patient.name,
+            fullname: Patient.name,
             healthId: Patient.health_id,
             token
         })

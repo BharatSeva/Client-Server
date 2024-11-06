@@ -17,7 +17,7 @@ const getinfo = async (req, res) => {
         const BioData = await info.findOne({ health_id }).select(["-__v", "-_id"])
         // set cache data
         await Setcaching('info', health_id, BioData)
-        
+
         res.status(StatusCode.OK).json({ BioData })
     } catch (error) {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: "Something Went Wrong!" })
@@ -26,10 +26,19 @@ const getinfo = async (req, res) => {
 }
 
 const getissue = async (req, res) => {
+    const validIssues = ["Low", "Moderate", "High", "Severe"];
     let limit = req.query.limit ? parseInt(req.query.limit) : 5;
+    const { health_id } = req.user
+    let severity = req.query.severity;
+
     try {
-        const { health_id } = req.user
-        const records = await issue.find({ health_id }).select(["-__v", "-_id"])
+
+        let query = { health_id };
+        if (severity && validIssues.includes(severity)) {
+            query.medical_severity = severity;
+        }
+
+        const records = await issue.find(query).select(["-__v", "-_id"])
             .sort("created_At")
             .limit(limit)
         res.status(StatusCode.OK).json({ issues: records, issues_fetched: records.length })
@@ -85,9 +94,6 @@ const viewed_biodata = async (req, res) => {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: err.message })
     }
 }
-
-
-
 
 module.exports = {
     getinfo,

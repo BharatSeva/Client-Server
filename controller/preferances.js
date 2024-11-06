@@ -1,4 +1,5 @@
 const { db } = require("../database/postgres")
+const StatusCode = require("http-status-codes")
 const preferances = db.pref
 const stats = db.stats
 
@@ -26,8 +27,14 @@ const update_pref = async (req, res) => {
     const { view_permission, email, locked_account } = req.body;
 
     try {
-        const pref = await preferances.findOne({ where: { health_id } });
+        const validemail = ["Every Event", "Weekly", "Opt Out", "Monthly"];
+        if (!validemail.includes(email)) {
+            res.status(StatusCode.NOT_ACCEPTABLE).json({ status: "Invalid email preferance, must be one of [\"Every Event\", \"Weekly\", \"Opt Out\", \"Monthly\"]" });
+            return;
+        }
 
+
+        const pref = await preferances.findOne({ where: { health_id } });
         if (!pref) {
             res.status(404).json({ status: "Not found" });
             return;

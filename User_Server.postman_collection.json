@@ -13,14 +13,14 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"health_id\":\"{{health_id}}\",\r\n    \"email\":\"{{user_email}}\",\r\n    \"password\":12345    \r\n}",
+					"raw": "{\r\n    \"health_id\":\"{{health_id}}\",\r\n    \"email\":\"{{patient_email}}\",\r\n    \"password\":12345    \r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
 						}
 					}
 				},
-				"url": "http://localhost:3001/api/v1/user/auth/register"
+				"url": "http://localhost/api/v1/user/auth/register"
 			},
 			"response": []
 		},
@@ -35,10 +35,55 @@
 							"var token = jsonData.token;\r",
 							"var healthId = jsonData.healthId;\r",
 							"pm.globals.set(\"USER_TOKEN\", token);\r",
-							"pm.globals.set(\"health_id\", healthId);"
+							"pm.globals.set(\"health_id\", healthId);\r",
+							"\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response status code is 202\", function () {\r",
+							"  pm.expect(pm.response.code).to.equal(202);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is less than 500ms\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response has the required fields - fullname, healthId, and token\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.fullname).to.exist;\r",
+							"    pm.expect(responseData.healthId).to.exist;\r",
+							"    pm.expect(responseData.token).to.exist;\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Token is a non-empty string\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseData.token).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Token should not be empty\");\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"HealthId is a non-empty string\", function () {\r",
+							"  const responseData = pm.response.json();\r",
+							"  \r",
+							"  pm.expect(responseData).to.be.an('object');\r",
+							"  pm.expect(responseData.healthId).to.be.a('string').and.to.have.lengthOf.at.least(1, \"HealthId should not be empty\");\r",
+							"});\r",
+							"\r",
+							""
 						],
 						"type": "text/javascript",
 						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"packages": {},
+						"type": "text/javascript"
 					}
 				}
 			],
@@ -71,7 +116,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"healthcare_name\": \"Drew Moore Hospital\",\r\n    \"healthcare_id\": \"HCIDbc18c389-375d-462e-a\",\r\n    \"appointment_date\":\"30-02-2025\",\r\n    \"appointment_time\":\"10:00 AM T0 12:00 PM\",\r\n    \"department\":\"Psycology\",\r\n    \"note\":\"Testing\"\r\n}",
+					"raw": "{\r\n    \"healthcare_name\": \"{{healthcare_name}}\",\r\n    \"healthcare_id\": \"{{healthcare_id}}\",\r\n    \"appointment_date\":\"30-02-2025\",\r\n    \"appointment_time\":\"10:00 AM T0 12:00 PM\",\r\n    \"department\":\"Dentist Deparment\",\r\n    \"note\":\"status testing goes here...\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -94,7 +139,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost/api/v1/user/appointment/fetch?limit=2",
+					"raw": "http://localhost/api/v1/user/appointment/fetch?limit=5&status=Pending",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -109,7 +154,11 @@
 					"query": [
 						{
 							"key": "limit",
-							"value": "2"
+							"value": "5"
+						},
+						{
+							"key": "status",
+							"value": "Pending"
 						}
 					]
 				}
@@ -118,6 +167,74 @@
 		},
 		{
 			"name": "Get Info",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is less than 200ms\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Validate the biodata object schema\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData.biodata).to.be.an('object');\r",
+							"    pm.expect(responseData.biodata.health_id).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.fname).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.middlename).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.lname).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.sex).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.dob).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.bloodgrp).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.bmi).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.marriage_status).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.weight).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.email).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.mobilenumber).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.aadhaar_number).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.primary_location).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.sibling).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.twin).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.fathername).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.mothername).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.emergencynumber).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.created_at).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.updated_at).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.address).to.be.an('object');\r",
+							"    pm.expect(responseData.biodata.address.country).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.address.state).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.address.city).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.address.landmark).to.be.a('string');\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Address object contains the required fields - country, state, city, and landmark\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData.address).to.be.an('object');\r",
+							"    pm.expect(responseData.address).to.include.all.keys('country', 'state', 'city', 'landmark');\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"RefreshIn field is present in the response\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.have.property('refreshIn');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -127,12 +244,30 @@
 				},
 				"method": "GET",
 				"header": [],
-				"url": "http://localhost/api/v1/user/info"
+				"url": {
+					"raw": "http://localhost/api/v1/user/info?cache=true",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"info"
+					],
+					"query": [
+						{
+							"key": "cache",
+							"value": "true"
+						}
+					]
+				}
 			},
 			"response": []
 		},
 		{
-			"name": "Get Issues",
+			"name": "Get Records",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -142,7 +277,29 @@
 				},
 				"method": "GET",
 				"header": [],
-				"url": "http://localhost/api/v1/user/issue"
+				"url": {
+					"raw": "http://localhost/api/v1/user/issue?limit=5&severity=Low",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"issue"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "5"
+						},
+						{
+							"key": "severity",
+							"value": "Low"
+						}
+					]
+				}
 			},
 			"response": []
 		},
@@ -159,7 +316,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"view_permission\": false,\r\n    \"locked_account\": false,\r\n    \"email\": \"Every Event\"\r\n}",
+					"raw": "{\r\n    \"view_permission\": true,\r\n    \"locked_account\": false,\r\n    \"email\": \"Every Event\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -211,7 +368,27 @@
 				},
 				"method": "GET",
 				"header": [],
-				"url": "http://localhost/api/v1/user/logs/records/viewed"
+				"url": {
+					"raw": "http://localhost/api/v1/user/logs/records/viewed?limit=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"logs",
+						"records",
+						"viewed"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "1"
+						}
+					]
+				}
 			},
 			"response": []
 		},
@@ -226,7 +403,27 @@
 				},
 				"method": "GET",
 				"header": [],
-				"url": "http://localhost/api/v1/user/logs/records/created"
+				"url": {
+					"raw": "http://localhost/api/v1/user/logs/records/created?limit=2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"logs",
+						"records",
+						"created"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "2"
+						}
+					]
+				}
 			},
 			"response": []
 		},
@@ -241,12 +438,83 @@
 				},
 				"method": "GET",
 				"header": [],
-				"url": "http://localhost/api/v1/user/logs/info/created"
+				"url": {
+					"raw": "http://localhost/api/v1/user/logs/info/created?limit=2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"logs",
+						"info",
+						"created"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "2"
+						}
+					]
+				}
 			},
 			"response": []
 		},
 		{
 			"name": "[Logs]  Biodata Viewed",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"  pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is within an acceptable range\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Viewed biodata array exists and is not empty\", function () {\r",
+							"  const responseData = pm.response.json();\r",
+							"  \r",
+							"  pm.expect(responseData.viewed_biodata).to.exist.and.to.be.an('array').that.is.not.empty;\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Each object in 'viewed_biodata' contains required fields\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData.viewed_biodata).to.be.an('array');\r",
+							"    responseData.viewed_biodata.forEach(function(entry) {\r",
+							"        pm.expect(entry).to.have.property('_id');\r",
+							"        pm.expect(entry).to.have.property('category');\r",
+							"        pm.expect(entry).to.have.property('email');\r",
+							"        pm.expect(entry).to.have.property('healthId');\r",
+							"        pm.expect(entry).to.have.property('healthcareId');\r",
+							"        pm.expect(entry).to.have.property('healthcare_name');\r",
+							"        pm.expect(entry).to.have.property('patient_name');\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Fetched field is a non-negative integer\", function () {\r",
+							"  const responseData = pm.response.json();\r",
+							"  \r",
+							"  pm.expect(responseData).to.be.an('object');\r",
+							"  pm.expect(responseData.fetched).to.be.a('number').and.to.satisfy((value) => value >= 0, \"Fetched value should be a non-negative integer\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -256,7 +524,27 @@
 				},
 				"method": "GET",
 				"header": [],
-				"url": "http://localhost/api/v1/user/logs/info/viewed"
+				"url": {
+					"raw": "http://localhost/api/v1/user/logs/info/viewed?limit=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"logs",
+						"info",
+						"viewed"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "1"
+						}
+					]
+				}
 			},
 			"response": []
 		},
@@ -272,7 +560,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost/api/v1/user/appointment/healthcare?limit=2&name=moore",
+					"raw": "http://localhost/api/v1/user/appointment/healthcare?limit=5&name=moore",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -287,7 +575,7 @@
 					"query": [
 						{
 							"key": "limit",
-							"value": "2"
+							"value": "5"
 						},
 						{
 							"key": "name",
@@ -319,13 +607,6 @@
 					""
 				]
 			}
-		}
-	],
-	"variable": [
-		{
-			"key": "health_id",
-			"value": "HIDae6ff23c-a425-49df-a ",
-			"type": "default"
 		}
 	]
 }
