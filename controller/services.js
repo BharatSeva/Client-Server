@@ -1,11 +1,23 @@
 const StatusCode = require('http-status-codes')
 const info = require("../schema/info")
 const issue = require("../schema/records")
+const { Setcaching, Getcaching } = require("../redis/services")
 
 const getinfo = async (req, res) => {
+    let cache = req.query.cache === 'false' ? false : true;
+    const { health_id } = req.user;
     try {
-        const { health_id } = req.user;
+        if (cache) {
+            const { cachedData, ttl } = await Getcaching('info', health_id)
+            if (cachedData) {
+                res.status(StatusCode.OK).json({ biodata: cachedData, status: "cache hit", refreshIn: ttl })
+                return
+            }
+        }
         const BioData = await info.findOne({ health_id }).select(["-__v", "-_id"])
+        // set cache data
+        await Setcaching('info', health_id, BioData)
+        
         res.status(StatusCode.OK).json({ BioData })
     } catch (error) {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: "Something Went Wrong!" })

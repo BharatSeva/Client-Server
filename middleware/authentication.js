@@ -1,30 +1,7 @@
 const jwt = require("jsonwebtoken");
 const StatusCode = require("http-status-codes");
-const Redis = require("ioredis"); 
 require('dotenv').config();
-
-const redis = new Redis({
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT,
-});
-
-const rateLimiter = async (req, res, next) => {
-    const userKey = `patient:rate_limit:${req.user.health_id}`;
-
-    try {
-        const currentRequests = await redis.incr(userKey);
-        if (currentRequests === 1) {
-            await redis.expire(userKey, process.env.WINDOW_SIZE_IN_SECONDS);
-        }
-        if (currentRequests > process.env.MAX_REQUESTS) {
-            return res.status(StatusCode.TOO_MANY_REQUESTS).json({ message: "Too many requests, please try again later." });
-        }
-        next();
-    } catch (err) {
-        console.error("Rate limiter error:", err);
-        res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
-    }
-};
+const { rateLimiter } = require("../redis/services")
 
 // Authentication Middleware
 const authentication = async (req, res, next) => {

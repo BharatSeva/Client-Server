@@ -56,26 +56,25 @@ const GetAppointment = async (req, res) => {
 
 
 // fetch healthcare infos for appoinments
-const db = require("../database/postgres")
+const { db } = require("../database/postgres")
 const { Op } = require('sequelize');
-const appoint_info = db.appoint_info
+const appoint_infos = db.appoint_info
 
 // find hospital name
 const appointment_info = async (req, res) => {
-    const { health_id } = req.user;
     let limit = req.query.limit ? parseInt(req.query.limit) : 5;
-    // name in query string to find the name of hospittal for appointment :)
     const { name } = req.query;
-
     try {
-        let info = await appoint_info.findAll({
+        let info = await appoint_infos.findAll({
             attributes: [
                 'healthcare_name',
                 'healthcare_id',
+                'healthcare_license',
                 'country',
                 'state',
                 'city',
-                'landmark'
+                'landmark',
+                'date_of_registration'
             ],
             where: name
                 ? { healthcare_name: { [Op.iLike]: `%${name}%` } }

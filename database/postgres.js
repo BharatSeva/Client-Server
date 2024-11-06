@@ -24,7 +24,7 @@ db.sequelize = sequelize;
 // take all the schemas
 db.pref = require("../schema/setting.js")(sequelize, DataTypes);
 db.stats = require("../schema/stats.js")(sequelize, DataTypes);
-db.appoint_info = require("../schema/appoint_info.js")(sequelize, DataTypes);
+db.appoint_info = require("../schema/healthcare_info.js")(sequelize, DataTypes);
 
 
 

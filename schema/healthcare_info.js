@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    const HIP = sequelize.define('hip_table', {
+    return sequelize.define('hip_table', {
         healthcare_id: {
             type: DataTypes.TEXT,
             allowNull: false,
@@ -72,5 +72,4 @@ module.exports = (sequelize, DataTypes) => {
         tableName: 'hip_table',
         timestamps: false,
     });
-    return HIP;
 };
