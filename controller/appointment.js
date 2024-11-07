@@ -21,7 +21,7 @@ const CreateAppointment = async (req, res) => {
             fullname,
             health_id,
             ...req.body,
-            status: "Pending"
+            status: "Pending" 
         };
         msgChannel.sendToQueue(QUEUE_NAME, Buffer.from(JSON.stringify(appointmentMessage)), {
             persistent: true,
@@ -35,7 +35,7 @@ const CreateAppointment = async (req, res) => {
 }
 
 const GetAppointment = async (req, res) => {
-    let limit = req.query.limit ? parseInt(req.query.limit) : 5;
+    let limit = req.query.limit ? parseInt(req.query.limit) : 10;
     let status = req.query.status;
     const { health_id } = req.user;
 
