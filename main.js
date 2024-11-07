@@ -1,8 +1,9 @@
 const express = require('express')
 const app = express()
 app.use(express.json())
-
-
+const cors = require("cors")
+app.use(cors())
+ 
 // Auth router
 const PatientRouter_Authorization = require("./router/auth")
 app.use('/api/v1/user/auth', PatientRouter_Authorization)

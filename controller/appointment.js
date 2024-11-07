@@ -3,7 +3,6 @@ const Appointment = require("../schema/appointment")
 // rabbitmq channel
 const { channel, connection } = require("../rabbitmq/connect")
 
-
 // create apppointment --> into rabbitmq
 const CreateAppointment = async (req, res) => {
     try {
@@ -35,7 +34,6 @@ const CreateAppointment = async (req, res) => {
     }
 }
 
-
 const GetAppointment = async (req, res) => {
     let limit = req.query.limit ? parseInt(req.query.limit) : 5;
     let status = req.query.status;
@@ -57,20 +55,16 @@ const GetAppointment = async (req, res) => {
         if (!appointments.length) {
             return res.status(StatusCode.NOT_FOUND).json({ message: "No Appointment Log Found!" });
         }
-
         res.status(StatusCode.OK).json({ appointments_details: appointments, fetched: appointments.length });
     } catch (err) {
         res.status(StatusCode.BAD_REQUEST).json({ message: err.message });
     }
 };
 
-
 // fetch healthcare infos for appoinments
 const { db } = require("../database/postgres")
 const { Op } = require('sequelize');
 const appoint_infos = db.appoint_info
-
-// find hospital name
 const appointment_info = async (req, res) => {
     let limit = req.query.limit ? parseInt(req.query.limit) : 5;
     const { name } = req.query;
@@ -104,10 +98,47 @@ const appointment_info = async (req, res) => {
     }
 };
 
+const GetHealthcareInfo = async (req, res) => {
+    let limit = req.query.limit ? parseInt(req.query.limit) : 5;
+    const { healthcare_id } = req.query;
+
+    // check wheather the name parameter is present or not
+    let filter = true;
+    if (!healthcare_id || healthcare_id.trim() === "") {
+        filter = false;
+    }
+    try {
+        let info = await appoint_infos.findOne({
+            attributes: [
+                'healthcare_name',
+                'healthcare_id',
+                'healthcare_license',
+                'country',
+                'state',
+                'city',
+                'landmark',
+                'date_of_registration',
+                'email',
+                'availability',
+                'total_facilities',
+                'total_mbbs_doc',
+                'no_of_beds',
+                'about',
+            ],
+            where: { healthcare_id: healthcare_id },
+            limit: limit != null ? limit : 10
+        });
+        res.status(200).json({ healthcare: info });
+    } catch (err) {
+        console.error("Error fetching preferences:", err.message);
+        res.status(500).json({ status: 'Could not process your request' });
+    }
+};
+
 module.exports = {
     CreateAppointment,
     GetAppointment,
 
-
     appointment_info,
+    GetHealthcareInfo,
 }

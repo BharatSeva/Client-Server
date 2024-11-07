@@ -29,7 +29,7 @@ const update_pref = async (req, res) => {
 
     try {
         const validemail = ["Every Event", "Weekly", "Opt Out", "Monthly"];
-        if (!validemail.includes(email)) {
+        if (email && !validemail.includes(email)) {
             res.status(StatusCode.NOT_ACCEPTABLE).json({ status: "Invalid email preferance, must be one of [\"Every Event\", \"Weekly\", \"Opt Out\", \"Monthly\"]" });
             return;
         }

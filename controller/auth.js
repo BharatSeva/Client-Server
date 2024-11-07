@@ -82,12 +82,6 @@ const login = async (req, res) => {
             persistent: true,
         });
 
-        // const IsAccountSuspended = await GetHealthUserSettingForServer(health_id.toString())
-        // if (!IsAccountSuspended.Account_Connection || !IsAccountSuspended.Total_request) {
-        //     res.status(StatusCode.NOT_ACCEPTABLE).json({ status: "Account Suspended!", message: "You Have Used all your 50 operations!, Please Mail to 21vaibhav11@gmail.com to extend the limit" })
-        //     return
-        // }
-
         const IspasswordCorrect = await Patient.P_comparePass(password)
         if (!IspasswordCorrect) {
             res.status(StatusCode.BAD_REQUEST).json({ message: "Incorrect Password!" })
@@ -95,16 +89,15 @@ const login = async (req, res) => {
         }
 
         const token = Patient.P_createJWT();
-        // await HealthUserLoginData(Patient.health_id, req.ip.toString())
 
         res.status(StatusCode.ACCEPTED).json({
             fullname: Patient.name,
-            healthId: Patient.health_id,
+            health_id: Patient.health_id,
             token
         })
-        // LoginDetected(Patient.name, Patient.health_id, req.ip, Patient.email)
     }
     catch (err) {
+        console.log(err)
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: err.message })
     }
 }

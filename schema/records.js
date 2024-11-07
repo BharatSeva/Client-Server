@@ -15,6 +15,9 @@ const Patient_Problem = new mongoose.Schema({
     medical_severity: {
         type: String,
     },
+    healthcare_name: {
+        type: String,
+    },
     created_at: {
         type: String,
         default: new Date(),
