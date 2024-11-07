@@ -13,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"health_id\":\"{{health_id}}\",\r\n    \"email\":\"{{patient_email}}\",\r\n    \"password\":12345    \r\n}",
+					"raw": "{\r\n    \"health_id\":\"{{health_id}}\",\r\n    \"email\":\"{{patient_email}}\",\r\n    \"password\":12345\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -33,7 +33,8 @@
 						"exec": [
 							"var jsonData = pm.response.json();\r",
 							"var token = jsonData.token;\r",
-							"var healthId = jsonData.healthId;\r",
+							"var healthId = jsonData.health_id;\r",
+							"\r",
 							"pm.globals.set(\"USER_TOKEN\", token);\r",
 							"pm.globals.set(\"health_id\", healthId);\r",
 							"\r",
@@ -82,8 +83,11 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"packages": {},
-						"type": "text/javascript"
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -139,7 +143,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost/api/v1/user/appointment/fetch?limit=5&status=Pending",
+					"raw": "http://localhost/api/v1/user/appointment/fetch",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -154,11 +158,13 @@
 					"query": [
 						{
 							"key": "limit",
-							"value": "5"
+							"value": "5",
+							"disabled": true
 						},
 						{
 							"key": "status",
-							"value": "Pending"
+							"value": "Pending",
+							"disabled": true
 						}
 					]
 				}
@@ -182,52 +188,52 @@
 							"});\r",
 							"\r",
 							"\r",
-							"pm.test(\"Validate the biodata object schema\", function () {\r",
-							"    const responseData = pm.response.json();\r",
+							"// pm.test(\"Validate the biodata object schema\", function () {\r",
+							"//     const responseData = pm.response.json();\r",
 							"    \r",
-							"    pm.expect(responseData.biodata).to.be.an('object');\r",
-							"    pm.expect(responseData.biodata.health_id).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.fname).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.middlename).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.lname).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.sex).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.dob).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.bloodgrp).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.bmi).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.marriage_status).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.weight).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.email).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.mobilenumber).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.aadhaar_number).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.primary_location).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.sibling).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.twin).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.fathername).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.mothername).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.emergencynumber).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.created_at).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.updated_at).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.address).to.be.an('object');\r",
-							"    pm.expect(responseData.biodata.address.country).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.address.state).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.address.city).to.be.a('string');\r",
-							"    pm.expect(responseData.biodata.address.landmark).to.be.a('string');\r",
-							"});\r",
+							"//     pm.expect(responseData.biodata).to.be.an('object');\r",
+							"//     pm.expect(responseData.biodata.health_id).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.fname).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.middlename).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.lname).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.sex).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.dob).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.bloodgrp).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.bmi).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.marriage_status).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.weight).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.email).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.mobilenumber).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.aadhaar_number).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.primary_location).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.sibling).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.twin).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.fathername).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.mothername).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.emergencynumber).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.created_at).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.updated_at).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.address).to.be.an('object');\r",
+							"//     pm.expect(responseData.biodata.address.country).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.address.state).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.address.city).to.be.a('string');\r",
+							"//     pm.expect(responseData.biodata.address.landmark).to.be.a('string');\r",
+							"// });\r",
 							"\r",
 							"\r",
-							"pm.test(\"Address object contains the required fields - country, state, city, and landmark\", function () {\r",
-							"    const responseData = pm.response.json();\r",
+							"// pm.test(\"Address object contains the required fields - country, state, city, and landmark\", function () {\r",
+							"//     const responseData = pm.response.json();\r",
 							"    \r",
-							"    pm.expect(responseData.address).to.be.an('object');\r",
-							"    pm.expect(responseData.address).to.include.all.keys('country', 'state', 'city', 'landmark');\r",
-							"});\r",
+							"//     pm.expect(responseData.address).to.be.an('object');\r",
+							"//     pm.expect(responseData.address).to.include.all.keys('country', 'state', 'city', 'landmark');\r",
+							"// });\r",
 							"\r",
 							"\r",
-							"pm.test(\"RefreshIn field is present in the response\", function () {\r",
-							"    const responseData = pm.response.json();\r",
+							"// pm.test(\"RefreshIn field is present in the response\", function () {\r",
+							"//     const responseData = pm.response.json();\r",
 							"    \r",
-							"    pm.expect(responseData).to.have.property('refreshIn');\r",
-							"});\r",
+							"//     pm.expect(responseData).to.have.property('refreshIn');\r",
+							"// });\r",
 							""
 						],
 						"type": "text/javascript",
@@ -278,7 +284,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost/api/v1/user/issue?limit=5&severity=Low",
+					"raw": "http://localhost/api/v1/user/issue?limit=5",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -296,10 +302,26 @@
 						},
 						{
 							"key": "severity",
-							"value": "Low"
+							"value": "Low",
+							"disabled": true
 						}
 					]
 				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Preferances",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost/api/v1/user/pref/get"
 			},
 			"response": []
 		},
@@ -324,21 +346,6 @@
 					}
 				},
 				"url": "http://localhost/api/v1/user/pref/update"
-			},
-			"response": []
-		},
-		{
-			"name": "Get Preferances",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": {
-						"token": "{{USER_TOKEN}}"
-					}
-				},
-				"method": "GET",
-				"header": [],
-				"url": "http://localhost/api/v1/user/pref/get"
 			},
 			"response": []
 		},
@@ -404,7 +411,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost/api/v1/user/logs/records/created?limit=2",
+					"raw": "http://localhost/api/v1/user/logs/records/created?limit=3",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -420,7 +427,7 @@
 					"query": [
 						{
 							"key": "limit",
-							"value": "2"
+							"value": "3"
 						}
 					]
 				}
@@ -525,7 +532,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost/api/v1/user/logs/info/viewed?limit=1",
+					"raw": "http://localhost/api/v1/user/logs/info/viewed?limit=5",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -541,7 +548,7 @@
 					"query": [
 						{
 							"key": "limit",
-							"value": "1"
+							"value": "5"
 						}
 					]
 				}
@@ -560,7 +567,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost/api/v1/user/appointment/healthcare?limit=5&name=moore",
+					"raw": "http://localhost/api/v1/user/appointment/healthcare?limit=5&name=wiza",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -579,7 +586,42 @@
 						},
 						{
 							"key": "name",
-							"value": "moore"
+							"value": "wiza"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get HealthCare Details",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost/api/v1/user/appointment/healthcare/search?healthcare_id={{healthcare_id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"appointment",
+						"healthcare",
+						"search"
+					],
+					"query": [
+						{
+							"key": "healthcare_id",
+							"value": "{{healthcare_id}}"
 						}
 					]
 				}

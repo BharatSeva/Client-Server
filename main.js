@@ -24,7 +24,7 @@ const { connect2redis } = require("./redis/connect")
 
 const start = async () => {
     try {
-        await ConnectDB(process.env.MONGOURL);
+        await ConnectDB(process.env.MONGOURL_USER);
         await connectRabbitMQ(process.env.RABBITMQ_URL);
         await connectopostgres()
         await connect2redis()

@@ -3,7 +3,7 @@
 
 require('dotenv').config()
 const { MongoClient } = require('mongodb');
-const uri = process.env.MONGOURL;
+const uri = process.env.MONGOURL_USER;
 const client = new MongoClient(uri);
  
 (async () => {
