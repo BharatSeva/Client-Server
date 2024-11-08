@@ -1,4 +1,4 @@
-# Bharat Seva+ Client Portal
+# Bharat Seva+ Client Portal [![Deploy to AzureVM](https://github.com/BharatSeva/User-Server/actions/workflows/deploy.yaml/badge.svg)](https://github.com/BharatSeva/User-Server/actions/workflows/deploy.yaml)
 > Patient, Client, and User names are used interchangeably
 
 This repository hosts the **Client Portal Service** for the Bharat Seva+ project. This service manages Client-related functionalities, including **authentication, profile management, and permission handling**, all built with **Express.js**. It integrates with other Bharat Seva+ services, such as healthcare records and notifications, to provide a seamless experience for client.
