@@ -1,9 +1,62 @@
 const express = require('express')
+const responsetime = require('response-time')
 const app = express()
 app.use(express.json())
 const cors = require("cors")
 app.use(cors())
  
+// metrics collection for prometheus and grafana
+const client = require('prom-client');
+const collectDefaultMetrics = client.collectDefaultMetrics;
+collectDefaultMetrics({ register: client.register})
+
+const ReqResTime = new client.Histogram({
+    name: "http_express_req_res_time",
+    help: "Duration of HTTP requests",
+    labelNames: ["method", "route", "status_code"],
+    buckets: [1, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 1000, 2000]
+});
+
+const totalReqCounter = new client.Counter({
+    name: "total_request",
+    help: "tell total request",
+})
+// Middleware to record response time
+app.use(responsetime((req, res, time) => {
+    totalReqCounter.inc()
+    ReqResTime.labels({
+        method: req.method,
+        route: req.url,
+        status_code: res.statusCode
+    }).observe(time);
+})); 
+
+
+
+
+// app.use('/', (req, res, next)=>{
+//     console.log(req.url)
+//     console.log(res.statusCode)
+//     next()
+// })
+
+
+app.get('/metrics', async (req, res)=>{
+    res.setHeader("Content-Type", client.register.contentType);
+    const metrics = await client.register.metrics()
+    res.send(metrics)
+})
+
+
+
+
+
+
+
+
+
+
+
 // Auth router
 const PatientRouter_Authorization = require("./router/auth")
 app.use('/api/v1/user/auth', PatientRouter_Authorization)
