@@ -1,10 +1,18 @@
 const { Sequelize, DataTypes } = require('sequelize');
 require('dotenv').config()
+// Adding connection pool to server
+// max of 7 and min of 2, idle of 30 seconds
 const sequelize = new Sequelize('postgres', process.env.POSTGRES_USER, process.env.POSTGRES_PASS, {
     host: process.env.POSTGRES_HOST,
     dialect: process.env.POSTGRES_DIALECT,
     port: process.env.POSTGRES_PORT,
-    logging: false
+    logging: false,
+    pool: {
+        max: 10,
+        min: 2,
+        acquire: 30000,
+        idle: 30000,
+    }
 });
 
 const connectopostgres = async () => {
