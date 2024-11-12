@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    return sequelize.define('healthuser_stats', {
+    return sequelize.define('client_stats', {
         health_id: {
             type: DataTypes.STRING,
             primaryKey: true,

@@ -1,22 +1,27 @@
-const client = require("../database/mongo_nativedriver")
-
+// Here fetch records without using schema so directly calling mongoose
+const mongoose = require('mongoose');
 const records_viewed = async (health_id, limit) => {
     try {
+        const query = { health_id };
         const dbName = 'logs';
         const collectionName = 'recordViewed';
-        const collection = client.db(dbName).collection(collectionName);
-        const query = { health_id };
+
+        // specify the db to use - without specifying in url parameters
+        const db = mongoose.connection.useDb(dbName);
+        // specify the collection to use
+        const collection = db.collection(collectionName);
         return await collection.find(query).limit(limit).toArray();
     } catch (error) {
         console.error('Error fetching records_viewed:', error);
-        return error;
+        return { viewed_records: [], fetched: 0 };
     }
-}
+};
 const records_created = async (health_id, limit) => {
     try {
         const dbName = 'logs';
         const collectionName = 'recordCreated';
-        const collection = client.db(dbName).collection(collectionName);
+        const db = mongoose.connection.useDb(dbName);
+        const collection = db.collection(collectionName);
         const query = { health_id };
         return await collection.find(query).limit(limit).toArray();
     } catch (error) {
@@ -28,7 +33,8 @@ const biodata_created = async (health_id, limit) => {
     try {
         const dbName = 'logs';
         const collectionName = 'biodataUpdated';
-        const collection = client.db(dbName).collection(collectionName);
+        const db = mongoose.connection.useDb(dbName);
+        const collection = db.collection(collectionName);
         const query = { health_id };
         return await collection.find(query).limit(limit).toArray();
     } catch (error) {
@@ -40,7 +46,8 @@ const biodata_viewed = async (health_id, limit) => {
     try {
         const dbName = 'logs';
         const collectionName = 'biodataViewed';
-        const collection = client.db(dbName).collection(collectionName);
+        const db = mongoose.connection.useDb(dbName);
+        const collection = db.collection(collectionName);
         const query = { health_id };
         return await collection.find(query).limit(limit).toArray();
     } catch (error) {

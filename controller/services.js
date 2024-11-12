@@ -1,6 +1,7 @@
 const StatusCode = require('http-status-codes')
-const info = require("../schema/info")
-const issue = require("../schema/records")
+// const info = require("../schema/info")
+// const issue = require("../schema/records")
+const mongoose = require('mongoose');
 const { Setcaching, Getcaching } = require("../redis/services")
 
 const getinfo = async (req, res) => {
@@ -14,7 +15,12 @@ const getinfo = async (req, res) => {
                 return
             }
         }
-        const BioData = await info.findOne({ health_id }).select(["-__v", "-_id"])
+        let query = { health_id };
+        const collectionName = "patient_details"
+        const collection = mongoose.connection.collection(collectionName);
+        const BioData = await collection.findOne(query, { projection: { _id: 0, __v: 0 } });
+        // const BioData = await info.findOne({ health_id }).select(["-__v", "-_id"])
+        
         // set cache data
         await Setcaching('info', health_id, BioData)
 
@@ -26,25 +32,26 @@ const getinfo = async (req, res) => {
 }
 
 const Get_Records = async (req, res) => {
-    const validIssues = ["Low", "Moderate", "High", "Severe"];
+    const validSeverity = ["Low", "Moderate", "High", "Severe"];
     let limit = req.query.limit ? parseInt(req.query.limit) : 5;
-    const { health_id } = req.user
+    const { health_id } = req.user;
     let severity = req.query.severity;
 
     try {
-
         let query = { health_id };
-        if (severity && validIssues.includes(severity)) {
+        if (severity && validSeverity.includes(severity)) {
             query.medical_severity = severity;
         } else {
             severity = "N/A"
         }
 
-        const records = await issue.find(query).select(["-__v", "-_id"])
-            .sort("created_At")
-            .limit(limit)
-            
-        res.status(StatusCode.OK).json({ issues: records, fetched: records.length, severity: severity })
+        // No Need to use schema here, just fetching records using collection name, 
+        // Mongoose native driver name
+        ////////////////
+        const collectionName = "patient_records"
+        const collection = mongoose.connection.collection(collectionName);
+        const records = await collection.find(query, { projection: { _id: 0 } }).limit(limit).toArray();
+        res.status(StatusCode.OK).json({ records: records, fetched: records.length, severity: severity })
     }
     catch (err) {
         res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: err.message })
