@@ -20,7 +20,7 @@
 						}
 					}
 				},
-				"url": "http://localhost/api/v1/user/auth/register"
+				"url": "{{Addr}}/api/v1/user/auth/register"
 			},
 			"response": [
 				{
@@ -160,7 +160,7 @@
 						}
 					}
 				},
-				"url": "http://localhost/api/v1/user/auth/login"
+				"url": "{{Addr}}/api/v1/user/auth/login"
 			},
 			"response": [
 				{
@@ -241,7 +241,7 @@
 						}
 					}
 				},
-				"url": "http://localhost/api/v1/user/appointment/create"
+				"url": "{{Addr}}/api/v1/user/appointment/create"
 			},
 			"response": [
 				{
@@ -314,10 +314,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost/api/v1/user/appointment/fetch",
+					"raw": "http://{{Addr}}/api/v1/user/appointment/fetch",
 					"protocol": "http",
 					"host": [
-						"localhost"
+						"{{Addr}}"
 					],
 					"path": [
 						"api",
@@ -495,10 +495,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost/api/v1/user/info?cache=true",
-					"protocol": "http",
+					"raw": "{{Addr}}/api/v1/user/info?cache=true",
 					"host": [
-						"localhost"
+						"{{Addr}}"
 					],
 					"path": [
 						"api",
@@ -594,10 +593,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost/api/v1/user/issue?limit=5",
-					"protocol": "http",
+					"raw": "{{Addr}}/api/v1/user/issue?limit=5&severity=High",
 					"host": [
-						"localhost"
+						"{{Addr}}"
 					],
 					"path": [
 						"api",
@@ -612,8 +610,7 @@
 						},
 						{
 							"key": "severity",
-							"value": "Low",
-							"disabled": true
+							"value": "High"
 						}
 					]
 				}
@@ -702,7 +699,7 @@
 				},
 				"method": "GET",
 				"header": [],
-				"url": "http://localhost/api/v1/user/pref/get"
+				"url": "http://{{Addr}}/api/v1/user/pref/get"
 			},
 			"response": [
 				{
@@ -774,7 +771,7 @@
 						}
 					}
 				},
-				"url": "http://localhost/api/v1/user/pref/update"
+				"url": "http://{{Addr}}/api/v1/user/pref/update"
 			},
 			"response": [
 				{
@@ -846,7 +843,7 @@
 				},
 				"method": "GET",
 				"header": [],
-				"url": "http://localhost/api/v1/user/stats"
+				"url": "{{Addr}}/api/v1/user/stats"
 			},
 			"response": [
 				{
@@ -910,10 +907,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost/api/v1/user/logs/records/viewed?limit=1",
-					"protocol": "http",
+					"raw": "{{Addr}}/api/v1/user/logs/records/viewed?limit=1",
 					"host": [
-						"localhost"
+						"{{Addr}}"
 					],
 					"path": [
 						"api",
@@ -1013,10 +1009,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost/api/v1/user/logs/records/created?limit=3",
-					"protocol": "http",
+					"raw": "{{Addr}}/api/v1/user/logs/records/created?limit=3",
 					"host": [
-						"localhost"
+						"{{Addr}}"
 					],
 					"path": [
 						"api",
@@ -1105,7 +1100,7 @@
 			]
 		},
 		{
-			"name": "[Logs] Biodata Created",
+			"name": "[Logs] profile_created",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -1116,10 +1111,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost/api/v1/user/logs/info/created?limit=2",
-					"protocol": "http",
+					"raw": "{{Addr}}/api/v1/user/logs/info/created?limit=2",
 					"host": [
-						"localhost"
+						"{{Addr}}"
 					],
 					"path": [
 						"api",
@@ -1208,7 +1202,7 @@
 			]
 		},
 		{
-			"name": "[Logs]  Biodata Viewed",
+			"name": "[Logs]  profile_viewed",
 			"event": [
 				{
 					"listen": "test",
@@ -1270,10 +1264,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost/api/v1/user/logs/info/viewed?limit=5",
-					"protocol": "http",
+					"raw": "{{Addr}}/api/v1/user/logs/info/viewed?limit=5",
 					"host": [
-						"localhost"
+						"{{Addr}}"
 					],
 					"path": [
 						"api",
@@ -1373,10 +1366,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost/api/v1/user/appointment/healthcare?limit=5&name=wiza",
-					"protocol": "http",
+					"raw": "{{Addr}}/api/v1/user/appointment/healthcare?limit=5",
 					"host": [
-						"localhost"
+						"{{Addr}}"
 					],
 					"path": [
 						"api",
@@ -1392,7 +1384,8 @@
 						},
 						{
 							"key": "name",
-							"value": "wiza"
+							"value": "wiza",
+							"disabled": true
 						}
 					]
 				}
@@ -1483,10 +1476,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost/api/v1/user/appointment/healthcare/search?healthcare_id={{healthcare_id}}",
-					"protocol": "http",
+					"raw": "{{Addr}}/api/v1/user/appointment/healthcare/search?healthcare_id={{healthcare_id}}",
 					"host": [
-						"localhost"
+						"{{Addr}}"
 					],
 					"path": [
 						"api",

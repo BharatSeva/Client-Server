@@ -4,7 +4,7 @@ const records_viewed = async (health_id, limit) => {
     try {
         const query = { health_id };
         const dbName = 'logs';
-        const collectionName = 'recordViewed';
+        const collectionName = 'records_viewed';
 
         // specify the db to use - without specifying in url parameters
         const db = mongoose.connection.useDb(dbName);
@@ -19,39 +19,39 @@ const records_viewed = async (health_id, limit) => {
 const records_created = async (health_id, limit) => {
     try {
         const dbName = 'logs';
-        const collectionName = 'recordCreated';
+        const collectionName = 'records_created';
         const db = mongoose.connection.useDb(dbName);
         const collection = db.collection(collectionName);
         const query = { health_id };
         return await collection.find(query).limit(limit).toArray();
     } catch (error) {
-        console.error('Error fetching records_viewed:', error);
+        console.error('Error fetching records_created:', error);
         return error;
     }
 }
 const biodata_created = async (health_id, limit) => {
     try {
         const dbName = 'logs';
-        const collectionName = 'biodataUpdated';
+        const collectionName = 'profile_updated';
         const db = mongoose.connection.useDb(dbName);
         const collection = db.collection(collectionName);
         const query = { health_id };
         return await collection.find(query).limit(limit).toArray();
     } catch (error) {
-        console.error('Error fetching records_viewed:', error);
+        console.error('Error fetching profile_updated:', error);
         return error;
     }
 }
 const biodata_viewed = async (health_id, limit) => {
     try {
         const dbName = 'logs';
-        const collectionName = 'biodataViewed';
+        const collectionName = 'profile_viewed';
         const db = mongoose.connection.useDb(dbName);
         const collection = db.collection(collectionName);
         const query = { health_id };
         return await collection.find(query).limit(limit).toArray();
     } catch (error) {
-        console.error('Error fetching records_viewed:', error);
+        console.error('Error fetching profile_viewed:', error);
         return error;
     }
 }
