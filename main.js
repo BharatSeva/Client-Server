@@ -25,12 +25,12 @@ const totalReqCounter = new client.Counter({
     help: "tell total request",
     labelNames: ["route"]
 });
-
+ 
 // Middleware to record response time
 app.use(responsetime((req, res, time) => {
     // this will log request in .log file
-    const logEntry = `Time: ${new Date().toISOString()} | Method: ${req.method} | URL: ${req.url} | Status: ${res.statusCode} | Duration: ${time.toFixed(2)} ms\n`;
-    fs.appendFileSync(path.join(__dirname, 'req_durations.log'), logEntry, (err) => {
+    const logEntry = `IP_ADDR: ${req.ip} | Time: ${new Date().toISOString()} | Method: ${req.method} | URL: ${req.url} | Status: ${res.statusCode} | Duration: ${time.toFixed(2)} ms\n`;
+    fs.appendFileSync(path.join(__dirname, 'req.log'), logEntry, (err) => {
         if (err) console.error("Error logging request duration:", err);
     });
 

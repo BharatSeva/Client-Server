@@ -1,54 +1,67 @@
-const bcryptjs = require("bcryptjs");
-const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
+const { DataTypes } = require('sequelize');
+const bcryptjs = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
+const { db } = require("../database/postgres")
+const sequelize = db.sequelize
 
-const auth = new mongoose.Schema({
-    name: {
-        type: String,
-        required: [true, "Name Is not Provided"],
-        maxlenght: 20,
+const ClientAuth = sequelize.define('clientAuth', {
+    fullname: {
+        type: DataTypes.STRING(50),
+        allowNull: false,
+        validate: {
+            len: [3, 200]
+        }
     },
-    email: {
-        type: String,
-        required: [true, "E-Mail Is not Provided"],
-        match: [
-            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/, "Please Provide Valid E-Mail Address",
-        ],
-        unique: true
-    },
+    email: { 
+        type: DataTypes.STRING(50),
+        allowNull: false,
+        unique: true,
+        validate: {
+            isEmail: true,
+            len: [1, 50]
+        }
+    },  
     health_id: {
-        type: String,
-        required: [true, "Health ID is not provided"],
-        unique: true
+        type: DataTypes.STRING(50),
+        allowNull: false,
+        unique: true,
+        validate: {
+            len: [1, 50]
+        }
     },
     password: {
-        type: String,
-        required: [true, "Password is not provided"],
-        minlength: 5,
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+            len: [5, 255]
+        }
     }
-}, { timestamps: true })
+}, {
+    timestamps: true,
+    tableName: 'clientAuth'
+});
+
+ClientAuth.addHook('beforeCreate', async (user) => {
+    const salt = await bcryptjs.genSalt(10);
+    user.password = await bcryptjs.hash(String(user.password), salt);
+});
 
 
- 
-auth.pre('save', async function (next) {
-    const salt = await bcryptjs.genSalt(10)
-    this.password = await bcryptjs.hash(this.password, salt)
-    next();
-})
+ClientAuth.prototype.P_createJWT = function () {
+    return jwt.sign(
+        { Patient_USERID: this.id, fullname: this.fullname, healthId: this.health_id, email: this.email },
+        process.env.Patient_JWT_SECRET_KEY,
+        {
+            expiresIn: process.env.Patient_JWT_LIFETIME,
+        }
+    );
+};
 
-auth.methods.P_createJWT = function () {
-    return jwt.sign({ Patient_USERID: this._id, name: this.name, healthId: this.health_id, email: this.email }, process.env.Patient_JWT_SECRET_KEY, {
-        expiresIn: process.env.Patient_JWT_LIFETIME,
-    })
-}
+ClientAuth.prototype.P_comparePass = async function (password) {
+    const isMatch = await bcryptjs.compare(password, this.password);
+    return isMatch;
+};
 
-auth.methods.P_comparePass = async function (password) {
-    const isMatch = await bcryptjs.compare(password, this.password)
-    return isMatch
-}
-
-
-
-module.exports = mongoose.model("patient_auth", auth)
+module.exports = ClientAuth;

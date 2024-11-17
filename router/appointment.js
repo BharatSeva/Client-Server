@@ -4,14 +4,14 @@ const router = express.Router()
 const {
     GetAppointment,
     CreateAppointment,
-    appointment_info,
+    search_healthcare,
     GetHealthcareInfo
 } = require("../controller/appointment")
 
 
-router.post('/appointment/create', CreateAppointment)
-router.get('/appointment/fetch', GetAppointment)
-router.get('/appointment/healthcare', appointment_info)
-router.get('/appointment/healthcare/search', GetHealthcareInfo)
+router.post('/appointment', CreateAppointment)
+router.get('/appointment', GetAppointment)
+router.get('/appointment/healthcare/search', search_healthcare)
+router.get('/appointment/healthcare/profile', GetHealthcareInfo)
 
 module.exports = router

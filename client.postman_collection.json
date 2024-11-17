@@ -8,6 +8,48 @@
 	"item": [
 		{
 			"name": "Register",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 400\", function () {",
+							"    pm.expect(pm.response.code).to.equal(400);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response has the required Content-Type header\", function () {",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Status field is present in the response\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.status).to.exist;",
+							"});",
+							"",
+							"",
+							"pm.test(\"Status field should not be empty\", function () {",
+							"  const responseData = pm.response.json();",
+							"  ",
+							"  pm.expect(responseData.status).to.exist.and.to.not.be.empty;",
+							"});",
+							"",
+							"",
+							"pm.test(\"Status field should exist and have a specific data type or format\", function () {",
+							"  const responseData = pm.response.json();",
+							"  ",
+							"  pm.expect(responseData).to.be.an('object');",
+							"  pm.expect(responseData.status).to.exist;",
+							"  // Additional checks for the specific data type or format of the status field can be added here",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -37,7 +79,7 @@
 								}
 							}
 						},
-						"url": "http://localhost/api/v1/user/auth/register"
+						"url": "{{Addr}}/api/v1/user/auth/register"
 					},
 					"status": "Created",
 					"code": 201,
@@ -49,7 +91,7 @@
 						},
 						{
 							"key": "Date",
-							"value": "Fri, 08 Nov 2024 05:18:02 GMT"
+							"value": "Sun, 17 Nov 2024 18:23:12 GMT"
 						},
 						{
 							"key": "Content-Type",
@@ -78,6 +120,62 @@
 					],
 					"cookie": [],
 					"body": "{\n    \"status\": \"Successfully Registered, Now You Can Login...\"\n}"
+				},
+				{
+					"name": "Register [Conflict]",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"health_id\":\"{{health_id}}\",\r\n    \"email\":\"{{patient_email}}\",\r\n    \"password\":12345\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{Addr}}/api/v1/user/auth/register"
+					},
+					"status": "Conflict",
+					"code": 409,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx/1.27.2"
+						},
+						{
+							"key": "Date",
+							"value": "Sun, 17 Nov 2024 18:23:20 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "37"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"25-I9M2lAMUvkXv9IHjtNSd0fSbnG4\""
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"status\": \"User Already Registered!\"\n}"
 				}
 			]
 		},
@@ -88,47 +186,52 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"var jsonData = pm.response.json();\r",
-							"var token = jsonData.token;\r",
-							"var healthId = jsonData.health_id;\r",
+							"if (pm.response.code >= 200 && pm.response.code < 300) {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    var token = jsonData.token;\r",
+							"    var healthId = jsonData.health_id;\r",
 							"\r",
-							"pm.globals.set(\"USER_TOKEN\", token);\r",
-							"pm.globals.set(\"health_id\", healthId);\r",
+							"    // Save values to Postman globals\r",
+							"    if (token) {\r",
+							"        pm.globals.set(\"USER_TOKEN\", token);\r",
+							"    }\r",
 							"\r",
+							"    if (healthId) {\r",
+							"        pm.globals.set(\"health_id\", healthId);\r",
+							"    }\r",
 							"\r",
+							"    console.log(\"Token and health ID set successfully.\");\r",
+							"} else {\r",
+							"    console.warn(\"Response is not successful (20x). Script skipped.\");\r",
+							"}\r",
 							"\r",
 							"pm.test(\"Response status code is 202\", function () {\r",
 							"  pm.expect(pm.response.code).to.equal(202);\r",
 							"});\r",
 							"\r",
 							"\r",
-							"pm.test(\"Response time is less than 500ms\", function () {\r",
-							"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
-							"});\r",
-							"\r",
-							"\r",
-							"pm.test(\"Response has the required fields - fullname, healthId, and token\", function () {\r",
+							"pm.test(\"Response has the required fields - fullname, health_id, and token\", function () {\r",
 							"    const responseData = pm.response.json();\r",
 							"    \r",
 							"    pm.expect(responseData).to.be.an('object');\r",
 							"    pm.expect(responseData.fullname).to.exist;\r",
-							"    pm.expect(responseData.healthId).to.exist;\r",
+							"    pm.expect(responseData.health_id).to.exist;\r",
 							"    pm.expect(responseData.token).to.exist;\r",
 							"});\r",
 							"\r",
 							"\r",
-							"pm.test(\"Token is a non-empty string\", function () {\r",
+							"pm.test(\"Fullname, health_id, and token are non-empty strings\", function () {\r",
 							"    const responseData = pm.response.json();\r",
-							"\r",
+							"    \r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.fullname).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Fullname should not be empty\");\r",
+							"    pm.expect(responseData.health_id).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Health ID should not be empty\");\r",
 							"    pm.expect(responseData.token).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Token should not be empty\");\r",
 							"});\r",
 							"\r",
 							"\r",
-							"pm.test(\"HealthId is a non-empty string\", function () {\r",
-							"  const responseData = pm.response.json();\r",
-							"  \r",
-							"  pm.expect(responseData).to.be.an('object');\r",
-							"  pm.expect(responseData.healthId).to.be.a('string').and.to.have.lengthOf.at.least(1, \"HealthId should not be empty\");\r",
+							"pm.test(\"Response time is less than 300ms\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
 							"});\r",
 							"\r",
 							""
@@ -177,7 +280,7 @@
 								}
 							}
 						},
-						"url": "http://localhost/api/v1/user/auth/login"
+						"url": "{{Addr}}/api/v1/user/auth/login"
 					},
 					"status": "Accepted",
 					"code": 202,
@@ -189,7 +292,7 @@
 						},
 						{
 							"key": "Date",
-							"value": "Fri, 08 Nov 2024 05:18:26 GMT"
+							"value": "Sun, 17 Nov 2024 18:23:46 GMT"
 						},
 						{
 							"key": "Content-Type",
@@ -197,7 +300,7 @@
 						},
 						{
 							"key": "Content-Length",
-							"value": "405"
+							"value": "393"
 						},
 						{
 							"key": "Connection",
@@ -213,16 +316,49 @@
 						},
 						{
 							"key": "ETag",
-							"value": "W/\"195-WXoa5Ii4Lu8Zzp36GUTj7NKLofo\""
+							"value": "W/\"189-wvC2L4mqy7b7uVoUMMVdPaPh7Wg\""
 						}
 					],
 					"cookie": [],
-					"body": "{\n    \"fullname\": \"Joe Crooks Shields\",\n    \"health_id\": \"HID80ecd462-e7a0-4810-9\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJQYXRpZW50X1VTRVJJRCI6IjY3MmQ5ZjBhOTM0MzcwMDZlM2FjODAxNCIsIm5hbWUiOiJKb2UgQ3Jvb2tzIFNoaWVsZHMiLCJoZWFsdGhJZCI6IkhJRDgwZWNkNDYyLWU3YTAtNDgxMC05IiwiZW1haWwiOiJBcnZpbGxhX0xpbmRncmVuQGdtYWlsLmNvbSIsImlhdCI6MTczMTA0MzEwNiwiZXhwIjoxNzMzNjM1MTA2fQ.GCYyxZqjnUNThLuDXx_pPmncMxeoIe2S4h8AjKA-aNQ\"\n}"
+					"body": "{\n    \"fullname\": \"Nicole Fadel Kumar Deckow\",\n    \"health_id\": \"HID9baee806-d143-499f-a\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJQYXRpZW50X1VTRVJJRCI6MiwiZnVsbG5hbWUiOiJOaWNvbGUgRmFkZWwgS3VtYXIgRGVja293IiwiaGVhbHRoSWQiOiJISUQ5YmFlZTgwNi1kMTQzLTQ5OWYtYSIsImVtYWlsIjoiSXNpZHJvLkFiZXJuYXRoeUBnbWFpbC5jb20iLCJpYXQiOjE3MzE4Njc4MjYsImV4cCI6MTczNDQ1OTgyNn0.QOuJnOqeu9VyvmmMTLHi3Rh-H-Ni14kwlJmpOJ2TQM8\"\n}"
 				}
 			]
 		},
 		{
 			"name": "Create Appointment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is less than 500ms\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Content-Type header is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response has the required fields\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.message).to.exist;\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -234,14 +370,14 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"healthcare_name\": \"{{healthcare_name}}\",\r\n    \"healthcare_id\": \"{{healthcare_id}}\",\r\n    \"appointment_date\":\"30-02-2025\",\r\n    \"appointment_time\":\"10:00 AM T0 12:00 PM\",\r\n    \"department\":\"Dentist Deparment\",\r\n    \"note\":\"status testing goes here...\"\r\n}",
+					"raw": "{\r\n    \"healthcare_name\": \"{{healthcare_name}}\",\r\n    \"healthcare_id\": \"{{healthcare_id}}\",\r\n    \"appointment_date\":\"30-02-2025\",\r\n    \"appointment_time\":\"10:00 AM T0 12:00 PM\",\r\n    \"department\":\"Dentist Deparment\",\r\n    \"note\":\"I've very serious problem doctor\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
 						}
 					}
 				},
-				"url": "{{Addr}}/api/v1/user/appointment/create"
+				"url": "{{Addr}}/api/v1/user/appointment"
 			},
 			"response": [
 				{
@@ -251,17 +387,17 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"healthcare_name\": \"{{healthcare_name}}\",\r\n    \"healthcare_id\": \"{{healthcare_id}}\",\r\n    \"appointment_date\":\"30-02-2025\",\r\n    \"appointment_time\":\"10:00 AM T0 12:00 PM\",\r\n    \"department\":\"Dentist Deparment\",\r\n    \"note\":\"status testing goes here...\"\r\n}",
+							"raw": "{\r\n    \"healthcare_name\": \"{{healthcare_name}}\",\r\n    \"healthcare_id\": \"{{healthcare_id}}\",\r\n    \"appointment_date\":\"30-02-2025\",\r\n    \"appointment_time\":\"10:00 AM T0 12:00 PM\",\r\n    \"department\":\"Dentist Deparment\",\r\n    \"note\":\"I've very serious problem doctor\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": "http://localhost/api/v1/user/appointment/create"
+						"url": "{{Addr}}/api/v1/user/appointment"
 					},
-					"status": "OK",
-					"code": 200,
+					"status": "Created",
+					"code": 201,
 					"_postman_previewlanguage": "json",
 					"header": [
 						{
@@ -270,7 +406,7 @@
 						},
 						{
 							"key": "Date",
-							"value": "Fri, 08 Nov 2024 05:18:38 GMT"
+							"value": "Sun, 17 Nov 2024 18:23:53 GMT"
 						},
 						{
 							"key": "Content-Type",
@@ -278,7 +414,7 @@
 						},
 						{
 							"key": "Content-Length",
-							"value": "33"
+							"value": "112"
 						},
 						{
 							"key": "Connection",
@@ -294,129 +430,16 @@
 						},
 						{
 							"key": "ETag",
-							"value": "W/\"21-UzfBPN4l18jYRSKTtK9VtDeMOcQ\""
+							"value": "W/\"70-mF/IGR+GRymMHILlPkIFwvC5kRM\""
 						}
 					],
 					"cookie": [],
-					"body": "{\n    \"message\": \"Appointment Created\"\n}"
+					"body": "{\n    \"status\": \"Appointment Successfully created!\",\n    \"message\": \"Wait for it to reflect on portal it may take sometime\"\n}"
 				}
 			]
 		},
 		{
 			"name": "Get Appointments",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": {
-						"token": "{{USER_TOKEN}}"
-					}
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://{{Addr}}/api/v1/user/appointment/fetch",
-					"protocol": "http",
-					"host": [
-						"{{Addr}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"user",
-						"appointment",
-						"fetch"
-					],
-					"query": [
-						{
-							"key": "limit",
-							"value": "5",
-							"disabled": true
-						},
-						{
-							"key": "status",
-							"value": "Pending",
-							"disabled": true
-						}
-					]
-				}
-			},
-			"response": [
-				{
-					"name": "Get Appointments",
-					"originalRequest": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost/api/v1/user/appointment/fetch",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"path": [
-								"api",
-								"v1",
-								"user",
-								"appointment",
-								"fetch"
-							],
-							"query": [
-								{
-									"key": "limit",
-									"value": "5",
-									"disabled": true
-								},
-								{
-									"key": "status",
-									"value": "Pending",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"status": "OK",
-					"code": 200,
-					"_postman_previewlanguage": "json",
-					"header": [
-						{
-							"key": "Server",
-							"value": "nginx/1.27.2"
-						},
-						{
-							"key": "Date",
-							"value": "Fri, 08 Nov 2024 05:18:45 GMT"
-						},
-						{
-							"key": "Content-Type",
-							"value": "application/json; charset=utf-8"
-						},
-						{
-							"key": "Content-Length",
-							"value": "362"
-						},
-						{
-							"key": "Connection",
-							"value": "keep-alive"
-						},
-						{
-							"key": "X-Powered-By",
-							"value": "Express"
-						},
-						{
-							"key": "Access-Control-Allow-Origin",
-							"value": "*"
-						},
-						{
-							"key": "ETag",
-							"value": "W/\"16a-kE31xKWN7oo5SZaAlWd3PW8zjc0\""
-						}
-					],
-					"cookie": [],
-					"body": "{\n    \"appointments_details\": [\n        {\n            \"fullname\": \"Joe Crooks Shields\",\n            \"health_id\": \"HID80ecd462-e7a0-4810-9\",\n            \"healthcare_name\": \"Wilbur Morar DVM Hospital\",\n            \"healthcare_id\": \"HCID5348e72d-0ca8-4cda-9\",\n            \"appointment_date\": \"30-02-2025\",\n            \"appointment_time\": \"10:00 AM T0 12:00 PM\",\n            \"department\": \"Dentist Deparment\",\n            \"note\": \"status testing goes here...\",\n            \"status\": \"Pending\"\n        }\n    ],\n    \"fetched\": 1\n}"
-				}
-			]
-		},
-		{
-			"name": "Get Info",
 			"event": [
 				{
 					"listen": "test",
@@ -427,57 +450,40 @@
 							"});\r",
 							"\r",
 							"\r",
-							"pm.test(\"Response time is less than 200ms\", function () {\r",
-							"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+							"pm.test(\"Response content type is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
 							"});\r",
 							"\r",
 							"\r",
-							"// pm.test(\"Validate the biodata object schema\", function () {\r",
-							"//     const responseData = pm.response.json();\r",
+							"pm.test(\"Response time is less than 500ms\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Appointments details array structure is valid\", function () {\r",
+							"    const responseData = pm.response.json();\r",
 							"    \r",
-							"//     pm.expect(responseData.biodata).to.be.an('object');\r",
-							"//     pm.expect(responseData.biodata.health_id).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.fname).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.middlename).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.lname).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.sex).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.dob).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.bloodgrp).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.bmi).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.marriage_status).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.weight).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.email).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.mobilenumber).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.aadhaar_number).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.primary_location).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.sibling).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.twin).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.fathername).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.mothername).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.emergencynumber).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.created_at).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.updated_at).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.address).to.be.an('object');\r",
-							"//     pm.expect(responseData.biodata.address.country).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.address.state).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.address.city).to.be.a('string');\r",
-							"//     pm.expect(responseData.biodata.address.landmark).to.be.a('string');\r",
-							"// });\r",
+							"    pm.expect(responseData.appointments_details).to.be.an('array');\r",
+							"\r",
+							"    responseData.appointments_details.forEach(appointment => {\r",
+							"        pm.expect(appointment).to.have.property('fullname').that.is.a('string');\r",
+							"        pm.expect(appointment).to.have.property('health_id').that.is.a('string');\r",
+							"        pm.expect(appointment).to.have.property('healthcare_name').that.is.a('string');\r",
+							"        pm.expect(appointment).to.have.property('healthcare_id').that.is.a('string');\r",
+							"        pm.expect(appointment).to.have.property('appointment_date').that.is.a('string');\r",
+							"        pm.expect(appointment).to.have.property('appointment_time').that.is.a('string');\r",
+							"        pm.expect(appointment).to.have.property('department').that.is.a('string');\r",
+							"        pm.expect(appointment).to.have.property('note').that.is.a('string');\r",
+							"        pm.expect(appointment).to.have.property('status').that.is.a('string');\r",
+							"    });\r",
+							"});\r",
 							"\r",
 							"\r",
-							"// pm.test(\"Address object contains the required fields - country, state, city, and landmark\", function () {\r",
-							"//     const responseData = pm.response.json();\r",
+							"pm.test(\"Ensure fetched property is present and has a value of 0\", function () {\r",
+							"    const responseData = pm.response.json();\r",
 							"    \r",
-							"//     pm.expect(responseData.address).to.be.an('object');\r",
-							"//     pm.expect(responseData.address).to.include.all.keys('country', 'state', 'city', 'landmark');\r",
-							"// });\r",
-							"\r",
-							"\r",
-							"// pm.test(\"RefreshIn field is present in the response\", function () {\r",
-							"//     const responseData = pm.response.json();\r",
-							"    \r",
-							"//     pm.expect(responseData).to.have.property('refreshIn');\r",
-							"// });\r",
+							"    pm.expect(responseData).to.have.property('fetched', 0);\r",
+							"});\r",
 							""
 						],
 						"type": "text/javascript",
@@ -495,7 +501,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{Addr}}/api/v1/user/info?cache=true",
+					"raw": "{{Addr}}/api/v1/user/appointment",
 					"host": [
 						"{{Addr}}"
 					],
@@ -503,144 +509,68 @@
 						"api",
 						"v1",
 						"user",
-						"info"
-					],
-					"query": [
-						{
-							"key": "cache",
-							"value": "true"
-						}
-					]
-				}
-			},
-			"response": [
-				{
-					"name": "Get Info",
-					"originalRequest": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost/api/v1/user/info?cache=true",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"path": [
-								"api",
-								"v1",
-								"user",
-								"info"
-							],
-							"query": [
-								{
-									"key": "cache",
-									"value": "true"
-								}
-							]
-						}
-					},
-					"status": "OK",
-					"code": 200,
-					"_postman_previewlanguage": "json",
-					"header": [
-						{
-							"key": "Server",
-							"value": "nginx/1.27.2"
-						},
-						{
-							"key": "Date",
-							"value": "Fri, 08 Nov 2024 05:18:54 GMT"
-						},
-						{
-							"key": "Content-Type",
-							"value": "application/json; charset=utf-8"
-						},
-						{
-							"key": "Content-Length",
-							"value": "705"
-						},
-						{
-							"key": "Connection",
-							"value": "keep-alive"
-						},
-						{
-							"key": "X-Powered-By",
-							"value": "Express"
-						},
-						{
-							"key": "Access-Control-Allow-Origin",
-							"value": "*"
-						},
-						{
-							"key": "ETag",
-							"value": "W/\"2c1-v4IIBTWa1xBPziD7imzey5y8raI\""
-						}
-					],
-					"cookie": [],
-					"body": "{\n    \"BioData\": {\n        \"health_id\": \"HID80ecd462-e7a0-4810-9\",\n        \"fname\": \"Joe Crooks\",\n        \"middlename\": \"Kumar\",\n        \"lname\": \"Shields\",\n        \"sex\": \"Male\",\n        \"dob\": \"Fri Nov 08 2024 01:03:31 GMT+0530 (India Standard Time)\",\n        \"bloodgrp\": \"u\",\n        \"bmi\": \"l\",\n        \"marriage_status\": \"Single\",\n        \"weight\": \"40-412-494-7248\",\n        \"email\": \"Arvilla_Lindgren@gmail.com\",\n        \"mobilenumber\": \"910-365-7194\",\n        \"aadhaar_number\": \"380-429-1890\",\n        \"primary_location\": \"sk\",\n        \"sibling\": \"true\",\n        \"twin\": \"true\",\n        \"fathername\": \"Mrs. May Larkin\",\n        \"mothername\": \"Ezra.Collier\",\n        \"emergencynumber\": \"268-345-0992\",\n        \"created_at\": \"2024-11-08T05:17:59.972Z\",\n        \"updated_at\": \"2024-11-08T05:17:59.972Z\",\n        \"address\": {\n            \"country\": \"Saint Barthelemy\",\n            \"state\": \"Asha Rapid\",\n            \"city\": \"Alexysbury\",\n            \"landmark\": \"3947 Dillan Cape\"\n        }\n    }\n}"
-				}
-			]
-		},
-		{
-			"name": "Get Records",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": {
-						"token": "{{USER_TOKEN}}"
-					}
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{Addr}}/api/v1/user/issue?limit=5&severity=High",
-					"host": [
-						"{{Addr}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"user",
-						"issue"
+						"appointment"
 					],
 					"query": [
 						{
 							"key": "limit",
-							"value": "5"
+							"value": "5",
+							"disabled": true
 						},
 						{
-							"key": "severity",
-							"value": "High"
+							"key": "status",
+							"value": "Pending",
+							"disabled": true
+						},
+						{
+							"key": "healthcare_name",
+							"value": "Benjamin Schneider Hospital",
+							"disabled": true
+						},
+						{
+							"key": "department",
+							"value": "Dentist Deparment",
+							"disabled": true
 						}
 					]
 				}
 			},
 			"response": [
 				{
-					"name": "Get Records",
+					"name": "Get Appointments",
 					"originalRequest": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost/api/v1/user/issue?limit=5",
-							"protocol": "http",
+							"raw": "{{Addr}}/api/v1/user/appointment",
 							"host": [
-								"localhost"
+								"{{Addr}}"
 							],
 							"path": [
 								"api",
 								"v1",
 								"user",
-								"issue"
+								"appointment"
 							],
 							"query": [
 								{
 									"key": "limit",
-									"value": "5"
+									"value": "5",
+									"disabled": true
 								},
 								{
-									"key": "severity",
-									"value": "Low",
+									"key": "status",
+									"value": "Pending",
+									"disabled": true
+								},
+								{
+									"key": "healthcare_name",
+									"value": "Benjamin Schneider Hospital",
+									"disabled": true
+								},
+								{
+									"key": "department",
+									"value": "Dentist Deparment",
 									"disabled": true
 								}
 							]
@@ -656,19 +586,23 @@
 						},
 						{
 							"key": "Date",
-							"value": "Fri, 08 Nov 2024 05:19:09 GMT"
+							"value": "Sun, 17 Nov 2024 18:24:00 GMT"
 						},
 						{
 							"key": "Content-Type",
 							"value": "application/json; charset=utf-8"
 						},
 						{
-							"key": "Content-Length",
-							"value": "272"
+							"key": "Transfer-Encoding",
+							"value": "chunked"
 						},
 						{
 							"key": "Connection",
 							"value": "keep-alive"
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding"
 						},
 						{
 							"key": "X-Powered-By",
@@ -680,16 +614,84 @@
 						},
 						{
 							"key": "ETag",
-							"value": "W/\"110-26+o3TOYVqlji07it5qGshKJ7qI\""
+							"value": "W/\"199-/OwOeoxnRdaJ4BSSKOvULMWwFhA\""
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "gzip"
 						}
 					],
 					"cookie": [],
-					"body": "{\n    \"issues\": [\n        {\n            \"issue\": \"product\",\n            \"createdby_\": \"HCID5348e72d-0ca8-4cda-9\",\n            \"description\": \"District\",\n            \"health_id\": \"HID80ecd462-e7a0-4810-9\",\n            \"medical_severity\": \"High\",\n            \"created_at\": \"0001-01-01T00:00:00Z\",\n            \"healthcare_name\": \"Wilbur Morar DVM Hospital\"\n        }\n    ],\n    \"fetched\": 1,\n    \"severity\": \"N/A\"\n}"
+					"body": "{\n    \"appointments_details\": [\n        {\n            \"status\": \"Pending\",\n            \"appointment_date\": \"30-02-2025\",\n            \"appointment_time\": \"10:00 AM T0 12:00 PM\",\n            \"healthcare_id\": \"HCID69d6e6cf-f071-4824-8\",\n            \"department\": \"Dentist Deparment\",\n            \"note\": \"I've very serious problem doctor\",\n            \"fullname\": \"Nicole Fadel Kumar Deckow\",\n            \"healthcare_name\": \"Pat Gaylord Hospital\",\n            \"createdAt\": \"2024-11-17T18:23:53.531Z\",\n            \"updatedAt\": \"2024-11-17T18:23:53.531Z\"\n        }\n    ],\n    \"fetched\": 1\n}"
 				}
 			]
 		},
 		{
-			"name": "Get Preferances",
+			"name": "Get Profile",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is less than 200ms\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response has the required fields\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.biodata).to.be.an('object');\r",
+							"    pm.expect(responseData.biodata.health_id).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.fname).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.middlename).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.lname).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.sex).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.dob).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.bloodgrp).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.bmi).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.marriage_status).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.weight).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.email).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.mobilenumber).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.aadhaar_number).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.primary_location).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.sibling).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.twin).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.fathername).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.mothername).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.emergencynumber).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.created_at).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.updated_at).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.address).to.be.an('object');\r",
+							"    pm.expect(responseData.biodata.address.country).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.address.state).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.address.city).to.be.a('string');\r",
+							"    pm.expect(responseData.biodata.address.landmark).to.be.a('string');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -699,15 +701,49 @@
 				},
 				"method": "GET",
 				"header": [],
-				"url": "http://{{Addr}}/api/v1/user/pref/get"
+				"url": {
+					"raw": "{{Addr}}/api/v1/user/profile?cache=false",
+					"host": [
+						"{{Addr}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"profile"
+					],
+					"query": [
+						{
+							"key": "cache",
+							"value": "false"
+						}
+					]
+				}
 			},
 			"response": [
 				{
-					"name": "Get Preferances",
+					"name": "Get Profile",
 					"originalRequest": {
 						"method": "GET",
 						"header": [],
-						"url": "http://localhost/api/v1/user/pref/get"
+						"url": {
+							"raw": "{{Addr}}/api/v1/user/profile?cache=false",
+							"host": [
+								"{{Addr}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"profile"
+							],
+							"query": [
+								{
+									"key": "cache",
+									"value": "false"
+								}
+							]
+						}
 					},
 					"status": "OK",
 					"code": 200,
@@ -719,7 +755,299 @@
 						},
 						{
 							"key": "Date",
-							"value": "Fri, 08 Nov 2024 05:19:15 GMT"
+							"value": "Sun, 17 Nov 2024 18:24:06 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"2e8-SU4MmQzkdKg5e/+QqRMMw2aEJXU\""
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "gzip"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"profile_data\": {\n        \"id\": 2,\n        \"health_id\": \"HID9baee806-d143-499f-a\",\n        \"first_name\": \"Nicole Fadel\",\n        \"middle_name\": \"Kumar\",\n        \"last_name\": \"Deckow\",\n        \"sex\": \"Male\",\n        \"healthcare_id\": \"HCID69d6e6cf-f071-4824-8\",\n        \"dob\": \"Sun Nov 17 2024 01:46:23 GMT+0530 (India Standard Time)\",\n        \"blood_group\": \"8\",\n        \"bmi\": \"e\",\n        \"marriage_status\": \"Single\",\n        \"weight\": \"1\",\n        \"email\": \"Isidro.Abernathy@gmail.com\",\n        \"mobile_number\": \"851-488-2323\",\n        \"aadhaar_number\": \"387-611-2660\",\n        \"primary_location\": \"hr\",\n        \"sibling\": \"true\",\n        \"twin\": \"false\",\n        \"father_name\": \"Virginia Torp\",\n        \"mother_name\": \"Destiney.Hahn74\",\n        \"emergency_number\": \"801-456-1437\",\n        \"createdAt\": \"2024-11-17T18:23:03.440Z\",\n        \"updatedAt\": \"2024-11-17T18:23:03.440Z\",\n        \"country\": \"Niger\",\n        \"city\": \"Hagenesville\",\n        \"state\": \"Kim Roads\",\n        \"landmark\": \"91694 America Lake\"\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Get Records",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response Content-Type header is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is within an acceptable range\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Validate the 'records' array in the response\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.records).to.be.an('array').and.to.have.lengthOf.at.least(1, \"At least one record should be present\");\r",
+							"    responseData.records.forEach(function(record) {\r",
+							"        pm.expect(record).to.be.an('object');\r",
+							"        // Add more specific checks for each record if needed\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Verify that all required fields are present and non-empty in the records array\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.records).to.be.an('array').and.to.have.lengthOf.at.least(1);\r",
+							"\r",
+							"    responseData.records.forEach(function(record) {\r",
+							"        pm.expect(record.issue).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");\r",
+							"        pm.expect(record.createdby_).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");\r",
+							"        pm.expect(record.description).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");\r",
+							"        pm.expect(record.health_id).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");\r",
+							"        pm.expect(record.medical_severity).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");\r",
+							"        pm.expect(record.created_at).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");\r",
+							"        pm.expect(record.healthcare_name).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Value should not be empty\");\r",
+							"    });\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{Addr}}/api/v1/user/records",
+					"host": [
+						"{{Addr}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"records"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10",
+							"disabled": true
+						},
+						{
+							"key": "severity",
+							"value": "High",
+							"disabled": true
+						},
+						{
+							"key": "healthcare_name",
+							"value": "Benjamin aHospital",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Get Records",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{Addr}}/api/v1/user/records",
+							"host": [
+								"{{Addr}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"records"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "severity",
+									"value": "High",
+									"disabled": true
+								},
+								{
+									"key": "healthcare_name",
+									"value": "Benjamin aHospital",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx/1.27.2"
+						},
+						{
+							"key": "Date",
+							"value": "Sun, 17 Nov 2024 18:24:25 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"1f3-wLHHp0GPqvcBmI5wy2YlRuX8jKA\""
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "gzip"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"records\": [\n        {\n            \"issue\": \"projection\",\n            \"createdby_\": \"HCID69d6e6cf-f071-4824-8\",\n            \"description\": \"Dynamic\",\n            \"health_id\": \"HID9baee806-d143-499f-a\",\n            \"medical_severity\": \"High\",\n            \"created_at\": \"0001-01-01T00:00:00Z\",\n            \"healthcare_name\": \"Pat Gaylord Hospital\"\n        },\n        {\n            \"issue\": \"neural-net\",\n            \"createdby_\": \"HCID69d6e6cf-f071-4824-8\",\n            \"description\": \"Internal\",\n            \"health_id\": \"HID9baee806-d143-499f-a\",\n            \"medical_severity\": \"High\",\n            \"created_at\": \"0001-01-01T00:00:00Z\",\n            \"healthcare_name\": \"Pat Gaylord Hospital\"\n        }\n    ],\n    \"fetched\": 2,\n    \"severity\": \"N/A\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Get Preferances",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"  pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Content-Type header is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is less than 500ms\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Validate the structure of the preferences object\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseData.preferences).to.exist.and.to.be.an('object');\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Health ID is a non-empty string or empty\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData.preferences.health_id).to.be.a('string').and.to.have.lengthOf.at.least(0);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "{{Addr}}/api/v1/user/preferences"
+			},
+			"response": [
+				{
+					"name": "Get Preferances",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": "{{Addr}}/api/v1/user/preferences"
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx/1.27.2"
+						},
+						{
+							"key": "Date",
+							"value": "Sun, 17 Nov 2024 18:24:31 GMT"
 						},
 						{
 							"key": "Content-Type",
@@ -743,16 +1071,61 @@
 						},
 						{
 							"key": "ETag",
-							"value": "W/\"7b-nSvOGcRKJYadO6ZXCjGfVzfVc44\""
+							"value": "W/\"7b-4xnWG6IMRYhn7b4VpQFMHeMmKzg\""
 						}
 					],
 					"cookie": [],
-					"body": "{\n    \"preferences\": {\n        \"health_id\": \"HID80ecd462-e7a0-4810-9\",\n        \"view_permission\": true,\n        \"locked_account\": false,\n        \"email\": \"Every Event\"\n    }\n}"
+					"body": "{\n    \"preferences\": {\n        \"health_id\": \"HID9baee806-d143-499f-a\",\n        \"view_permission\": true,\n        \"locked_account\": false,\n        \"email\": \"Every Event\"\n    }\n}"
 				}
 			]
 		},
 		{
 			"name": "Update Preferances",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response has the required fields - status and preferences\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData).to.have.property('status');\r",
+							"    pm.expect(responseData).to.have.property('preferences');\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"View_permission is a boolean value\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData.preferences.view_permission).to.be.a('boolean');\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Locked_account is a boolean value\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseData).to.have.property('preferences');\r",
+							"    pm.expect(responseData.preferences.locked_account).to.be.a('boolean');\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Email is a non-empty string\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData.email).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Email should not be empty\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -764,14 +1137,14 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"view_permission\": true,\r\n    \"locked_account\": false,\r\n    \"email\": \"Every Event\"\r\n}",
+					"raw": "{\r\n    \"view_permission\": true,\r\n    // \"locked_account\": false,\r\n    \"email\": \"Every Event\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
 						}
 					}
 				},
-				"url": "http://{{Addr}}/api/v1/user/pref/update"
+				"url": "{{Addr}}/api/v1/user/preferences/update"
 			},
 			"response": [
 				{
@@ -781,14 +1154,14 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"view_permission\": true,\r\n    \"locked_account\": false,\r\n    \"email\": \"Every Event\"\r\n}",
+							"raw": "{\r\n    \"view_permission\": true,\r\n    // \"locked_account\": false,\r\n    \"email\": \"Every Event\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": "http://localhost/api/v1/user/pref/update"
+						"url": "{{Addr}}/api/v1/user/preferences/update"
 					},
 					"status": "OK",
 					"code": 200,
@@ -800,7 +1173,7 @@
 						},
 						{
 							"key": "Date",
-							"value": "Fri, 08 Nov 2024 05:19:21 GMT"
+							"value": "Sun, 17 Nov 2024 18:24:36 GMT"
 						},
 						{
 							"key": "Content-Type",
@@ -808,7 +1181,7 @@
 						},
 						{
 							"key": "Content-Length",
-							"value": "167"
+							"value": "187"
 						},
 						{
 							"key": "Connection",
@@ -824,16 +1197,70 @@
 						},
 						{
 							"key": "ETag",
-							"value": "W/\"a7-XxOka01xGnuBKxAyd1ik3ZMKaPg\""
+							"value": "W/\"bb-8YmTmUQqb8M2/eKwTHkWzLR0K50\""
 						}
 					],
 					"cookie": [],
-					"body": "{\n    \"status\": \"Preferences updated successfully\",\n    \"preferences\": {\n        \"health_id\": \"HID80ecd462-e7a0-4810-9\",\n        \"view_permission\": true,\n        \"locked_account\": false,\n        \"email\": \"Every Event\"\n    }\n}"
+					"body": "{\n    \"status\": \"Success\",\n    \"message\": \"Preferences updated successfully\",\n    \"preferences\": {\n        \"health_id\": \"HID9baee806-d143-499f-a\",\n        \"view_permission\": true,\n        \"locked_account\": false,\n        \"email\": \"Every Event\"\n    }\n}"
 				}
 			]
 		},
 		{
 			"name": "Stats",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is less than 500ms\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response has the required fields\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.have.property('stats');\r",
+							"    pm.expect(responseData.stats).to.have.property('health_id');\r",
+							"    pm.expect(responseData.stats).to.have.property('account_status');\r",
+							"    pm.expect(responseData.stats).to.have.property('available_money');\r",
+							"    pm.expect(responseData.stats).to.have.property('profile_viewed');\r",
+							"    pm.expect(responseData.stats).to.have.property('profile_updated');\r",
+							"    pm.expect(responseData.stats).to.have.property('records_viewed');\r",
+							"    pm.expect(responseData.stats).to.have.property('records_created');\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Health_id and account_status are non-empty strings\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData.stats).to.be.an('object');\r",
+							"    pm.expect(responseData.stats.health_id).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Health_id should not be empty\");\r",
+							"    pm.expect(responseData.stats.account_status).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Account_status should not be empty\");\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Profile_viewed, profile_updated, records_viewed, and records_created are non-negative integers\", function () {\r",
+							"    const responseData = pm.response.json().stats;\r",
+							"    \r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.profile_viewed).to.be.a('number').and.to.be.at.least(0);\r",
+							"    pm.expect(responseData.profile_updated).to.be.a('number').and.to.be.at.least(0);\r",
+							"    pm.expect(responseData.records_viewed).to.be.a('number').and.to.be.at.least(0);\r",
+							"    pm.expect(responseData.records_created).to.be.a('number').and.to.be.at.least(0);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -851,7 +1278,7 @@
 					"originalRequest": {
 						"method": "GET",
 						"header": [],
-						"url": "http://localhost/api/v1/user/stats"
+						"url": "{{Addr}}/api/v1/user/stats"
 					},
 					"status": "OK",
 					"code": 200,
@@ -863,7 +1290,7 @@
 						},
 						{
 							"key": "Date",
-							"value": "Fri, 08 Nov 2024 05:19:26 GMT"
+							"value": "Sun, 17 Nov 2024 18:24:41 GMT"
 						},
 						{
 							"key": "Content-Type",
@@ -871,7 +1298,7 @@
 						},
 						{
 							"key": "Content-Length",
-							"value": "255"
+							"value": "177"
 						},
 						{
 							"key": "Connection",
@@ -887,365 +1314,62 @@
 						},
 						{
 							"key": "ETag",
-							"value": "W/\"ff-zJSOVzi07eHe6qfLkRIAIdk9Oso\""
+							"value": "W/\"b1-GTbVa5CGY4BV8/7hFq1fOwwV45o\""
 						}
 					],
 					"cookie": [],
-					"body": "{\n    \"stats\": {\n        \"health_id\": \"HID80ecd462-e7a0-4810-9\",\n        \"account_status\": \"Trial\",\n        \"available_money\": \"5000\",\n        \"profile_viewed\": 0,\n        \"profile_updated\": 0,\n        \"records_viewed\": 0,\n        \"records_created\": 0,\n        \"updatedAt\": \"2024-11-08T05:19:26.401Z\",\n        \"createdAt\": \"2024-11-08T05:19:26.401Z\"\n    }\n}"
+					"body": "{\n    \"stats\": {\n        \"health_id\": \"HID9baee806-d143-499f-a\",\n        \"account_status\": \"Trial\",\n        \"available_money\": \"5000\",\n        \"profile_viewed\": 0,\n        \"profile_updated\": 1,\n        \"records_viewed\": 0,\n        \"records_created\": 2\n    }\n}"
 				}
 			]
 		},
 		{
 			"name": "[Logs] Records Viewed",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": {
-						"token": "{{USER_TOKEN}}"
-					}
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{Addr}}/api/v1/user/logs/records/viewed?limit=1",
-					"host": [
-						"{{Addr}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"user",
-						"logs",
-						"records",
-						"viewed"
-					],
-					"query": [
-						{
-							"key": "limit",
-							"value": "1"
-						}
-					]
-				}
-			},
-			"response": [
-				{
-					"name": "[Logs] Records Viewed",
-					"originalRequest": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost/api/v1/user/logs/records/viewed?limit=1",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"path": [
-								"api",
-								"v1",
-								"user",
-								"logs",
-								"records",
-								"viewed"
-							],
-							"query": [
-								{
-									"key": "limit",
-									"value": "1"
-								}
-							]
-						}
-					},
-					"status": "OK",
-					"code": 200,
-					"_postman_previewlanguage": "json",
-					"header": [
-						{
-							"key": "Server",
-							"value": "nginx/1.27.2"
-						},
-						{
-							"key": "Date",
-							"value": "Fri, 08 Nov 2024 05:19:39 GMT"
-						},
-						{
-							"key": "Content-Type",
-							"value": "application/json; charset=utf-8"
-						},
-						{
-							"key": "Content-Length",
-							"value": "249"
-						},
-						{
-							"key": "Connection",
-							"value": "keep-alive"
-						},
-						{
-							"key": "X-Powered-By",
-							"value": "Express"
-						},
-						{
-							"key": "Access-Control-Allow-Origin",
-							"value": "*"
-						},
-						{
-							"key": "ETag",
-							"value": "W/\"f9-+OaJg8Iono4sz0tdUPkJDMs5bOU\""
-						}
-					],
-					"cookie": [],
-					"body": "{\n    \"viewed_records\": [\n        {\n            \"_id\": \"672d9f68acaa6cbb3c711c15\",\n            \"category\": \"recordViewed\",\n            \"date\": \"2024-11-08 05:19:36\",\n            \"health_id\": \"HID80ecd462-e7a0-4810-9\",\n            \"healthcare_id\": \"HCID5348e72d-0ca8-4cda-9\",\n            \"healthcare_name\": \"Wilbur Morar DVM Hospital\"\n        }\n    ],\n    \"fetched\": 1\n}"
-				}
-			]
-		},
-		{
-			"name": "[Logs] Records Created",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": {
-						"token": "{{USER_TOKEN}}"
-					}
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{Addr}}/api/v1/user/logs/records/created?limit=3",
-					"host": [
-						"{{Addr}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"user",
-						"logs",
-						"records",
-						"created"
-					],
-					"query": [
-						{
-							"key": "limit",
-							"value": "3"
-						}
-					]
-				}
-			},
-			"response": [
-				{
-					"name": "[Logs] Records Created",
-					"originalRequest": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost/api/v1/user/logs/records/created?limit=3",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"path": [
-								"api",
-								"v1",
-								"user",
-								"logs",
-								"records",
-								"created"
-							],
-							"query": [
-								{
-									"key": "limit",
-									"value": "3"
-								}
-							]
-						}
-					},
-					"status": "OK",
-					"code": 200,
-					"_postman_previewlanguage": "json",
-					"header": [
-						{
-							"key": "Server",
-							"value": "nginx/1.27.2"
-						},
-						{
-							"key": "Date",
-							"value": "Fri, 08 Nov 2024 05:19:45 GMT"
-						},
-						{
-							"key": "Content-Type",
-							"value": "application/json; charset=utf-8"
-						},
-						{
-							"key": "Content-Length",
-							"value": "251"
-						},
-						{
-							"key": "Connection",
-							"value": "keep-alive"
-						},
-						{
-							"key": "X-Powered-By",
-							"value": "Express"
-						},
-						{
-							"key": "Access-Control-Allow-Origin",
-							"value": "*"
-						},
-						{
-							"key": "ETag",
-							"value": "W/\"fb-+F3+RVImOw40ijm0OwXoT7gl2No\""
-						}
-					],
-					"cookie": [],
-					"body": "{\n    \"records_created\": [\n        {\n            \"_id\": \"672d9f49acaa6cbb3c711c14\",\n            \"category\": \"recordCreated\",\n            \"date\": \"2024-11-08 05:19:05\",\n            \"health_id\": \"HID80ecd462-e7a0-4810-9\",\n            \"healthcare_id\": \"HCID5348e72d-0ca8-4cda-9\",\n            \"healthcare_name\": \"Wilbur Morar DVM Hospital\"\n        }\n    ],\n    \"fetched\": 1\n}"
-				}
-			]
-		},
-		{
-			"name": "[Logs] profile_created",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": {
-						"token": "{{USER_TOKEN}}"
-					}
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{Addr}}/api/v1/user/logs/info/created?limit=2",
-					"host": [
-						"{{Addr}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"user",
-						"logs",
-						"info",
-						"created"
-					],
-					"query": [
-						{
-							"key": "limit",
-							"value": "2"
-						}
-					]
-				}
-			},
-			"response": [
-				{
-					"name": "[Logs] Biodata Created",
-					"originalRequest": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost/api/v1/user/logs/info/created?limit=2",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"path": [
-								"api",
-								"v1",
-								"user",
-								"logs",
-								"info",
-								"created"
-							],
-							"query": [
-								{
-									"key": "limit",
-									"value": "2"
-								}
-							]
-						}
-					},
-					"status": "OK",
-					"code": 200,
-					"_postman_previewlanguage": "json",
-					"header": [
-						{
-							"key": "Server",
-							"value": "nginx/1.27.2"
-						},
-						{
-							"key": "Date",
-							"value": "Fri, 08 Nov 2024 05:19:50 GMT"
-						},
-						{
-							"key": "Content-Type",
-							"value": "application/json; charset=utf-8"
-						},
-						{
-							"key": "Content-Length",
-							"value": "325"
-						},
-						{
-							"key": "Connection",
-							"value": "keep-alive"
-						},
-						{
-							"key": "X-Powered-By",
-							"value": "Express"
-						},
-						{
-							"key": "Access-Control-Allow-Origin",
-							"value": "*"
-						},
-						{
-							"key": "ETag",
-							"value": "W/\"145-Dz3HSTTEcXOx8umDZAM3rS+h3ng\""
-						}
-					],
-					"cookie": [],
-					"body": "{\n    \"created_biodata\": [\n        {\n            \"_id\": \"672d9f07acaa6cbb3c711c0f\",\n            \"category\": \"biodataUpdated\",\n            \"date\": \"2024-11-08 05:17:59\",\n            \"health_id\": \"HID80ecd462-e7a0-4810-9\",\n            \"healthcare_id\": \"HCID5348e72d-0ca8-4cda-9\",\n            \"healthcare_name\": \"Wilbur Morar DVM Hospital\",\n            \"patient_email\": \"Arvilla_Lindgren@gmail.com\",\n            \"patient_name\": \"Joe Crooks\"\n        }\n    ],\n    \"fetched\": 1\n}"
-				}
-			]
-		},
-		{
-			"name": "[Logs]  profile_viewed",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
 							"pm.test(\"Response status code is 200\", function () {\r",
-							"  pm.expect(pm.response.code).to.equal(200);\r",
+							"    pm.response.to.have.status(200);\r",
 							"});\r",
 							"\r",
 							"\r",
-							"pm.test(\"Response time is within an acceptable range\", function () {\r",
-							"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+							"pm.test(\"Response time is less than 500ms\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
 							"});\r",
 							"\r",
 							"\r",
-							"pm.test(\"Viewed biodata array exists and is not empty\", function () {\r",
-							"  const responseData = pm.response.json();\r",
-							"  \r",
-							"  pm.expect(responseData.viewed_biodata).to.exist.and.to.be.an('array').that.is.not.empty;\r",
-							"});\r",
-							"\r",
-							"\r",
-							"pm.test(\"Each object in 'viewed_biodata' contains required fields\", function () {\r",
+							"pm.test(\"Response has the required fields\", function () {\r",
 							"    const responseData = pm.response.json();\r",
 							"    \r",
-							"    pm.expect(responseData.viewed_biodata).to.be.an('array');\r",
-							"    responseData.viewed_biodata.forEach(function(entry) {\r",
-							"        pm.expect(entry).to.have.property('_id');\r",
-							"        pm.expect(entry).to.have.property('category');\r",
-							"        pm.expect(entry).to.have.property('email');\r",
-							"        pm.expect(entry).to.have.property('healthId');\r",
-							"        pm.expect(entry).to.have.property('healthcareId');\r",
-							"        pm.expect(entry).to.have.property('healthcare_name');\r",
-							"        pm.expect(entry).to.have.property('patient_name');\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    responseData.viewed_records.forEach(record => {\r",
+							"        pm.expect(record).to.have.property('_id');\r",
+							"        pm.expect(record).to.have.property('category');\r",
+							"        pm.expect(record).to.have.property('date');\r",
+							"        pm.expect(record).to.have.property('health_id');\r",
+							"        pm.expect(record).to.have.property('healthcare_id');\r",
+							"        pm.expect(record).to.have.property('healthcare_name');\r",
 							"    });\r",
 							"});\r",
 							"\r",
 							"\r",
-							"pm.test(\"Fetched field is a non-negative integer\", function () {\r",
+							"pm.test(\"Id is a non-empty string\", function () {\r",
 							"  const responseData = pm.response.json();\r",
 							"  \r",
-							"  pm.expect(responseData).to.be.an('object');\r",
-							"  pm.expect(responseData.fetched).to.be.a('number').and.to.satisfy((value) => value >= 0, \"Fetched value should be a non-negative integer\");\r",
+							"  pm.expect(responseData.viewed_records).to.be.an('array').and.to.have.lengthOf.at.least(1);\r",
+							"  responseData.viewed_records.forEach(function(record) {\r",
+							"    pm.expect(record._id).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Id should not be empty\");\r",
+							"  });\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Date is in a valid date format\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    responseData.viewed_records.forEach(record => {\r",
+							"        pm.expect(record.date).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);\r",
+							"    });\r",
 							"});\r",
 							""
 						],
@@ -1264,7 +1388,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{Addr}}/api/v1/user/logs/info/viewed?limit=5",
+					"raw": "{{Addr}}/api/v1/user/logs/records/viewed",
 					"host": [
 						"{{Addr}}"
 					],
@@ -1273,118 +1397,18 @@
 						"v1",
 						"user",
 						"logs",
-						"info",
+						"records",
 						"viewed"
 					],
 					"query": [
 						{
 							"key": "limit",
-							"value": "5"
-						}
-					]
-				}
-			},
-			"response": [
-				{
-					"name": "[Logs]  Biodata Viewed",
-					"originalRequest": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost/api/v1/user/logs/info/viewed?limit=5",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"path": [
-								"api",
-								"v1",
-								"user",
-								"logs",
-								"info",
-								"viewed"
-							],
-							"query": [
-								{
-									"key": "limit",
-									"value": "5"
-								}
-							]
-						}
-					},
-					"status": "OK",
-					"code": 200,
-					"_postman_previewlanguage": "json",
-					"header": [
-						{
-							"key": "Server",
-							"value": "nginx/1.27.2"
+							"value": "1",
+							"disabled": true
 						},
 						{
-							"key": "Date",
-							"value": "Fri, 08 Nov 2024 05:20:07 GMT"
-						},
-						{
-							"key": "Content-Type",
-							"value": "application/json; charset=utf-8"
-						},
-						{
-							"key": "Content-Length",
-							"value": "315"
-						},
-						{
-							"key": "Connection",
-							"value": "keep-alive"
-						},
-						{
-							"key": "X-Powered-By",
-							"value": "Express"
-						},
-						{
-							"key": "Access-Control-Allow-Origin",
-							"value": "*"
-						},
-						{
-							"key": "ETag",
-							"value": "W/\"13b-fChCahBfKx52eEDwmZ0d2wYGkc4\""
-						}
-					],
-					"cookie": [],
-					"body": "{\n    \"viewed_biodata\": [\n        {\n            \"_id\": \"672d9f81acaa6cbb3c711c16\",\n            \"category\": \"biodataViewed\",\n            \"date\": \"2024-11-08 05:20:01\",\n            \"email\": \"Arvilla_Lindgren@gmail.com\",\n            \"health_id\": \"HID80ecd462-e7a0-4810-9\",\n            \"healthcare_id\": \"HCID5348e72d-0ca8-4cda-9\",\n            \"healthcare_name\": \"Wilbur Morar DVM Hospital\",\n            \"patient_name\": \"Joe Crooks\"\n        }\n    ],\n    \"fetched\": 1\n}"
-				}
-			]
-		},
-		{
-			"name": "Find Hospital Name",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": {
-						"token": "{{USER_TOKEN}}"
-					}
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{Addr}}/api/v1/user/appointment/healthcare?limit=5",
-					"host": [
-						"{{Addr}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"user",
-						"appointment",
-						"healthcare"
-					],
-					"query": [
-						{
-							"key": "limit",
-							"value": "5"
-						},
-						{
-							"key": "name",
-							"value": "wiza",
+							"key": "healthcare_name",
+							"value": "Benjamin Schneider Hospital",
 							"disabled": true
 						}
 					]
@@ -1392,31 +1416,32 @@
 			},
 			"response": [
 				{
-					"name": "Find Hospital Name",
+					"name": "[Logs] Records Viewed",
 					"originalRequest": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost/api/v1/user/appointment/healthcare?limit=5",
-							"protocol": "http",
+							"raw": "{{Addr}}/api/v1/user/logs/records/viewed",
 							"host": [
-								"localhost"
+								"{{Addr}}"
 							],
 							"path": [
 								"api",
 								"v1",
 								"user",
-								"appointment",
-								"healthcare"
+								"logs",
+								"records",
+								"viewed"
 							],
 							"query": [
 								{
 									"key": "limit",
-									"value": "5"
+									"value": "1",
+									"disabled": true
 								},
 								{
-									"key": "name",
-									"value": "wiza",
+									"key": "healthcare_name",
+									"value": "Benjamin Schneider Hospital",
 									"disabled": true
 								}
 							]
@@ -1432,7 +1457,7 @@
 						},
 						{
 							"key": "Date",
-							"value": "Fri, 08 Nov 2024 05:20:16 GMT"
+							"value": "Sun, 17 Nov 2024 18:24:59 GMT"
 						},
 						{
 							"key": "Content-Type",
@@ -1440,7 +1465,7 @@
 						},
 						{
 							"key": "Content-Length",
-							"value": "339"
+							"value": "246"
 						},
 						{
 							"key": "Connection",
@@ -1456,16 +1481,66 @@
 						},
 						{
 							"key": "ETag",
-							"value": "W/\"153-3r8qIL1tCI8XF67WFch9PAHjpU8\""
+							"value": "W/\"f6-r9lcZyv89aC9UaopmsJaQ1fF6Eo\""
 						}
 					],
 					"cookie": [],
-					"body": "{\n    \"healthcare\": [\n        {\n            \"healthcare_name\": \"Wilbur Morar DVM Hospital\",\n            \"healthcare_id\": \"HCID5348e72d-0ca8-4cda-9\",\n            \"healthcare_license\": \"5348e72d-0ca8-4cda-9\",\n            \"country\": \"Russian Federation\",\n            \"state\": \"East Octaviaton\",\n            \"city\": \"Florence-Graham\",\n            \"landmark\": \"Bahringer Plaza\",\n            \"date_of_registration\": \"2024-11-08T05:17:42.897Z\"\n        }\n    ],\n    \"fetched\": 1,\n    \"filter\": false\n}"
+					"body": "{\n    \"viewed_records\": [\n        {\n            \"_id\": \"673a34f8ba2c429de5c7804c\",\n            \"category\": \"records_viewed\",\n            \"date\": \"2024-11-17 18:24:56\",\n            \"health_id\": \"HID9baee806-d143-499f-a\",\n            \"healthcare_id\": \"HCID69d6e6cf-f071-4824-8\",\n            \"healthcare_name\": \"Pat Gaylord Hospital\"\n        }\n    ],\n    \"fetched\": 1\n}"
 				}
 			]
 		},
 		{
-			"name": "Get HealthCare Details",
+			"name": "[Logs] Records Created",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"  pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Content-Type header is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is less than 500ms\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Validate the structure of 'records_created' array and its fields\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.records_created).to.be.an('array');\r",
+							"    \r",
+							"    responseData.records_created.forEach(function(record) {\r",
+							"        pm.expect(record).to.be.an('object');\r",
+							"        pm.expect(record._id).to.be.a('string');\r",
+							"        pm.expect(record.category).to.be.a('string');\r",
+							"        pm.expect(record.date).to.be.a('string');\r",
+							"        pm.expect(record.health_id).to.be.a('string');\r",
+							"        pm.expect(record.healthcare_id).to.be.a('string');\r",
+							"        pm.expect(record.healthcare_name).to.be.a('string');\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Fetched property is present and has a value of 0\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.have.property('fetched', 0);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -1476,7 +1551,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{Addr}}/api/v1/user/appointment/healthcare/search?healthcare_id={{healthcare_id}}",
+					"raw": "{{Addr}}/api/v1/user/logs/records/created",
 					"host": [
 						"{{Addr}}"
 					],
@@ -1484,42 +1559,53 @@
 						"api",
 						"v1",
 						"user",
-						"appointment",
-						"healthcare",
-						"search"
+						"logs",
+						"records",
+						"created"
 					],
 					"query": [
 						{
-							"key": "healthcare_id",
-							"value": "{{healthcare_id}}"
+							"key": "limit",
+							"value": "3",
+							"disabled": true
+						},
+						{
+							"key": "healthcare_name",
+							"value": "Benjamin Schneider Hospital",
+							"disabled": true
 						}
 					]
 				}
 			},
 			"response": [
 				{
-					"name": "Get HealthCare Details",
+					"name": "[Logs] Records Created",
 					"originalRequest": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost/api/v1/user/appointment/healthcare/search?healthcare_id={{healthcare_id}}",
-							"protocol": "http",
+							"raw": "{{Addr}}/api/v1/user/logs/records/created",
 							"host": [
-								"localhost"
+								"{{Addr}}"
 							],
 							"path": [
 								"api",
 								"v1",
 								"user",
-								"appointment",
-								"healthcare",
-								"search"
+								"logs",
+								"records",
+								"created"
 							],
 							"query": [
 								{
-									"key": "healthcare_id",
-									"value": "{{healthcare_id}}"
+									"key": "limit",
+									"value": "3",
+									"disabled": true
+								},
+								{
+									"key": "healthcare_name",
+									"value": "Benjamin Schneider Hospital",
+									"disabled": true
 								}
 							]
 						}
@@ -1534,19 +1620,23 @@
 						},
 						{
 							"key": "Date",
-							"value": "Fri, 08 Nov 2024 05:20:24 GMT"
+							"value": "Sun, 17 Nov 2024 18:25:04 GMT"
 						},
 						{
 							"key": "Content-Type",
 							"value": "application/json; charset=utf-8"
 						},
 						{
-							"key": "Content-Length",
-							"value": "447"
+							"key": "Transfer-Encoding",
+							"value": "chunked"
 						},
 						{
 							"key": "Connection",
 							"value": "keep-alive"
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding"
 						},
 						{
 							"key": "X-Powered-By",
@@ -1558,11 +1648,761 @@
 						},
 						{
 							"key": "ETag",
-							"value": "W/\"1bf-V9SBA6VPTUW8G/aWPejE9M5Fpkk\""
+							"value": "W/\"1cf-nsKLDs3a/DKx+5+gELB/V0MdQVA\""
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "gzip"
 						}
 					],
 					"cookie": [],
-					"body": "{\n    \"healthcare\": {\n        \"healthcare_name\": \"Wilbur Morar DVM Hospital\",\n        \"healthcare_id\": \"HCID5348e72d-0ca8-4cda-9\",\n        \"healthcare_license\": \"5348e72d-0ca8-4cda-9\",\n        \"country\": \"Russian Federation\",\n        \"state\": \"East Octaviaton\",\n        \"city\": \"Florence-Graham\",\n        \"landmark\": \"Bahringer Plaza\",\n        \"date_of_registration\": \"2024-11-08T05:17:42.897Z\",\n        \"email\": \"Nestor.Tremblay62@gmail.com\",\n        \"availability\": \"Yes\",\n        \"total_facilities\": 200,\n        \"total_mbbs_doc\": 58,\n        \"no_of_beds\": 200,\n        \"about\": \"Product\"\n    }\n}"
+					"body": "{\n    \"records_created\": [\n        {\n            \"_id\": \"673a34d3ba2c429de5c78049\",\n            \"category\": \"records_created\",\n            \"date\": \"2024-11-17 18:24:19\",\n            \"health_id\": \"HID9baee806-d143-499f-a\",\n            \"healthcare_id\": \"HCID69d6e6cf-f071-4824-8\",\n            \"healthcare_name\": \"Pat Gaylord Hospital\"\n        },\n        {\n            \"_id\": \"673a34d3ba2c429de5c7804b\",\n            \"category\": \"records_created\",\n            \"date\": \"2024-11-17 18:24:19\",\n            \"health_id\": \"HID9baee806-d143-499f-a\",\n            \"healthcare_id\": \"HCID69d6e6cf-f071-4824-8\",\n            \"healthcare_name\": \"Pat Gaylord Hospital\"\n        }\n    ],\n    \"fetched\": 2\n}"
+				}
+			]
+		},
+		{
+			"name": "[Logs] profile_updated",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is within an acceptable range\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Validate the structure of the 'created_biodata' object\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.created_biodata).to.be.an('array');\r",
+							"    responseData.created_biodata.forEach(function (item) {\r",
+							"        pm.expect(item).to.be.an('object');\r",
+							"        pm.expect(item).to.have.property('_id');\r",
+							"        pm.expect(item).to.have.property('category');\r",
+							"        pm.expect(item).to.have.property('date');\r",
+							"        pm.expect(item).to.have.property('health_id');\r",
+							"        pm.expect(item).to.have.property('healthcare_id');\r",
+							"        pm.expect(item).to.have.property('healthcare_name');\r",
+							"        pm.expect(item).to.have.property('patient_email');\r",
+							"        pm.expect(item).to.have.property('patient_name');\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Fetched property is present and has a value\", function () {\r",
+							"  const responseData = pm.response.json();\r",
+							"  \r",
+							"  pm.expect(responseData).to.have.property('fetched');\r",
+							"  pm.expect(responseData.fetched).to.exist;\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Created biodata array should not be empty\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseData.created_biodata).to.be.an('array').that.is.not.empty;\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{Addr}}/api/v1/user/logs/profile/updated",
+					"host": [
+						"{{Addr}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"logs",
+						"profile",
+						"updated"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "2",
+							"disabled": true
+						},
+						{
+							"key": "healthcare_name",
+							"value": "Benjamin Schneider Hospital",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "[Logs] profile_updated",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{Addr}}/api/v1/user/logs/profile/updated",
+							"host": [
+								"{{Addr}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"logs",
+								"profile",
+								"updated"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "2",
+									"disabled": true
+								},
+								{
+									"key": "healthcare_name",
+									"value": "Benjamin Schneider Hospital",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx/1.27.2"
+						},
+						{
+							"key": "Date",
+							"value": "Sun, 17 Nov 2024 18:25:13 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"143-ez2bc3bdj0d+hpj3iVmeH9kPjBE\""
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "gzip"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"profile_updated\": [\n        {\n            \"_id\": \"673a3487ba2c429de5c78044\",\n            \"category\": \"profile_updated\",\n            \"date\": \"2024-11-17 18:23:03\",\n            \"health_id\": \"HID9baee806-d143-499f-a\",\n            \"healthcare_id\": \"HCID69d6e6cf-f071-4824-8\",\n            \"healthcare_name\": \"Pat Gaylord Hospital\",\n            \"patient_email\": \"Isidro.Abernathy@gmail.com\",\n            \"patient_name\": \"Nicole Fadel\"\n        }\n    ],\n    \"fetched\": 1\n}"
+				}
+			]
+		},
+		{
+			"name": "[Logs]  profile_viewed",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is less than 500ms\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Validate the 'viewed_biodata' array\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData.viewed_biodata).to.be.an('array').and.to.have.lengthOf.at.least(1);\r",
+							"    responseData.viewed_biodata.forEach(function(item) {\r",
+							"        pm.expect(item).to.be.an('object');\r",
+							"        pm.expect(item).to.have.property('_id').that.is.a('string');\r",
+							"        pm.expect(item).to.have.property('category').that.is.a('string');\r",
+							"        pm.expect(item).to.have.property('date').that.is.a('string');\r",
+							"        pm.expect(item).to.have.property('email').that.is.a('string');\r",
+							"        pm.expect(item).to.have.property('health_id').that.is.a('string');\r",
+							"        pm.expect(item).to.have.property('healthcare_id').that.is.a('string');\r",
+							"        pm.expect(item).to.have.property('healthcare_name').that.is.a('string');\r",
+							"        pm.expect(item).to.have.property('patient_name').that.is.a('string');\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Fetched is a non-negative integer\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData.fetched).to.be.a('number').and.to.be.at.least(0);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Each object in viewed_biodata has required fields\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData.viewed_biodata).to.be.an('array').and.to.have.lengthOf.at.least(1);\r",
+							"    \r",
+							"    responseData.viewed_biodata.forEach(function (biodata) {\r",
+							"        pm.expect(biodata).to.have.property('_id').that.is.a('string');\r",
+							"        pm.expect(biodata).to.have.property('category').that.is.a('string');\r",
+							"        pm.expect(biodata).to.have.property('date').that.is.a('string');\r",
+							"        pm.expect(biodata).to.have.property('email').that.is.a('string');\r",
+							"        pm.expect(biodata).to.have.property('health_id').that.is.a('string');\r",
+							"        pm.expect(biodata).to.have.property('healthcare_id').that.is.a('string');\r",
+							"        pm.expect(biodata).to.have.property('healthcare_name').that.is.a('string');\r",
+							"        pm.expect(biodata).to.have.property('patient_name').that.is.a('string');\r",
+							"    });\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{Addr}}/api/v1/user/logs/profile/viewed",
+					"host": [
+						"{{Addr}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"logs",
+						"profile",
+						"viewed"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "5",
+							"disabled": true
+						},
+						{
+							"key": "healthcare_name",
+							"value": "Benjamin Schneider Hospital",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "[Logs]  profile_viewed",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{Addr}}/api/v1/user/logs/profile/viewed",
+							"host": [
+								"{{Addr}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"logs",
+								"profile",
+								"viewed"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "healthcare_name",
+									"value": "Benjamin Schneider Hospital",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx/1.27.2"
+						},
+						{
+							"key": "Date",
+							"value": "Sun, 17 Nov 2024 18:25:32 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"139-sxK7YY4nXmSbRxhKSp7c3xWm1u0\""
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "gzip"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"profile_viewed\": [\n        {\n            \"_id\": \"673a3518ba2c429de5c7804d\",\n            \"category\": \"profile_viewed\",\n            \"date\": \"2024-11-17 18:25:28\",\n            \"email\": \"Isidro.Abernathy@gmail.com\",\n            \"health_id\": \"HID9baee806-d143-499f-a\",\n            \"healthcare_id\": \"HCID69d6e6cf-f071-4824-8\",\n            \"healthcare_name\": \"Pat Gaylord Hospital\",\n            \"patient_name\": \"Nicole Fadel\"\n        }\n    ],\n    \"fetched\": 1\n}"
+				}
+			]
+		},
+		{
+			"name": "Search Hospital",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response has the required fields\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.healthcare).to.be.an('array').and.to.have.lengthOf.at.least(1);\r",
+							"\r",
+							"    responseData.healthcare.forEach(function(item) {\r",
+							"        pm.expect(item).to.have.property('healthcare_name').that.is.a('string');\r",
+							"        pm.expect(item).to.have.property('healthcare_id').that.is.a('string');\r",
+							"        pm.expect(item).to.have.property('healthcare_license').that.is.a('string');\r",
+							"        pm.expect(item).to.have.property('country').that.is.a('string');\r",
+							"        pm.expect(item).to.have.property('state').that.is.a('string');\r",
+							"        pm.expect(item).to.have.property('city').that.is.a('string');\r",
+							"        pm.expect(item).to.have.property('landmark').that.is.a('string');\r",
+							"        pm.expect(item).to.have.property('date_of_registration').that.is.a('string');\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Date_of_registration is in a valid date format\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    responseData.healthcare.forEach(function(healthcare) {\r",
+							"        pm.expect(healthcare.date_of_registration).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is less than 500ms\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response Content-Type header is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{Addr}}/api/v1/user/appointment/healthcare/search",
+					"host": [
+						"{{Addr}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"appointment",
+						"healthcare",
+						"search"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "5",
+							"disabled": true
+						},
+						{
+							"key": "healthcare_name",
+							"value": "Dach",
+							"disabled": true
+						},
+						{
+							"key": "healthcare_id",
+							"value": "HCID1628b316-c122-4ca1-ba",
+							"disabled": true
+						},
+						{
+							"key": "state",
+							"value": "wis",
+							"disabled": true
+						},
+						{
+							"key": "city",
+							"value": "Bend",
+							"disabled": true
+						},
+						{
+							"key": "country",
+							"value": "Niger",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Search Hospital",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{Addr}}/api/v1/user/appointment/healthcare/search",
+							"host": [
+								"{{Addr}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"appointment",
+								"healthcare",
+								"search"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "healthcare_name",
+									"value": "Dach",
+									"disabled": true
+								},
+								{
+									"key": "healthcare_id",
+									"value": "HCID1628b316-c122-4ca1-ba",
+									"disabled": true
+								},
+								{
+									"key": "state",
+									"value": "wis",
+									"disabled": true
+								},
+								{
+									"key": "city",
+									"value": "Bend",
+									"disabled": true
+								},
+								{
+									"key": "country",
+									"value": "Niger",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx/1.27.2"
+						},
+						{
+							"key": "Date",
+							"value": "Sun, 17 Nov 2024 18:25:39 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"467-l3uDjRzkhpv+3e9xG06jiGjP4T8\""
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "gzip"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"healthcare\": [\n        {\n            \"healthcare_name\": \"Terrence Kessler Hospital\",\n            \"healthcare_id\": \"HCIDb36fa9a2-5576-447e-a\",\n            \"healthcare_license\": \"b36fa9a2-5576-447e-a\",\n            \"country\": \"Pakistan\",\n            \"state\": \"Tillmanhaven\",\n            \"city\": \"New Johnny\",\n            \"landmark\": \"Fisher River\",\n            \"date_of_registration\": \"2024-11-17T18:11:27.053Z\"\n        },\n        {\n            \"healthcare_name\": \"Rudolph Hane Hospital\",\n            \"healthcare_id\": \"HCID252ad4ba-2334-4685-a\",\n            \"healthcare_license\": \"252ad4ba-2334-4685-a\",\n            \"country\": \"Denmark\",\n            \"state\": \"Kendale Lakes\",\n            \"city\": \"Dickinsonland\",\n            \"landmark\": \"Welch Fords\",\n            \"date_of_registration\": \"2024-11-17T18:11:28.312Z\"\n        },\n        {\n            \"healthcare_name\": \"Beth Renner Hospital\",\n            \"healthcare_id\": \"HCIDa6568f11-6948-4b3f-b\",\n            \"healthcare_license\": \"a6568f11-6948-4b3f-b\",\n            \"country\": \"Namibia\",\n            \"state\": \"Tristianfurt\",\n            \"city\": \"North Harold\",\n            \"landmark\": \"Maynard Unions\",\n            \"date_of_registration\": \"2024-11-17T18:11:29.124Z\"\n        },\n        {\n            \"healthcare_name\": \"Pat Gaylord Hospital\",\n            \"healthcare_id\": \"HCID69d6e6cf-f071-4824-8\",\n            \"healthcare_license\": \"69d6e6cf-f071-4824-8\",\n            \"country\": \"Nigeria\",\n            \"state\": \"Lewisville\",\n            \"city\": \"North Janiyabury\",\n            \"landmark\": \"Tremblay Mountain\",\n            \"date_of_registration\": \"2024-11-17T18:12:07.737Z\"\n        }\n    ],\n    \"fetched\": 4\n}"
+				}
+			]
+		},
+		{
+			"name": "Get HealthCare Profile",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Content type is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is less than 500ms\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response has the required fields\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.healthcare.healthcare_name).to.exist;\r",
+							"    pm.expect(responseData.healthcare.healthcare_id).to.exist;\r",
+							"    pm.expect(responseData.healthcare.healthcare_license).to.exist;\r",
+							"    pm.expect(responseData.healthcare.country).to.exist;\r",
+							"    pm.expect(responseData.healthcare.state).to.exist;\r",
+							"    pm.expect(responseData.healthcare.city).to.exist;\r",
+							"    pm.expect(responseData.healthcare.landmark).to.exist;\r",
+							"    pm.expect(responseData.healthcare.date_of_registration).to.exist;\r",
+							"    pm.expect(responseData.healthcare.email).to.exist;\r",
+							"    pm.expect(responseData.healthcare.availability).to.exist;\r",
+							"    pm.expect(responseData.healthcare.total_facilities).to.exist;\r",
+							"    pm.expect(responseData.healthcare.total_mbbs_doc).to.exist;\r",
+							"    pm.expect(responseData.healthcare.no_of_beds).to.exist;\r",
+							"    pm.expect(responseData.healthcare.about).to.exist;\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Email is in a valid format\", function () {\r",
+							"  const responseData = pm.response.json();\r",
+							"  \r",
+							"  pm.expect(responseData.healthcare.email).to.be.a('string').and.to.match(/^.+@.+\\..+$/);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{USER_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{Addr}}/api/v1/user/appointment/healthcare/profile?healthcare_id={{healthcare_id}}",
+					"host": [
+						"{{Addr}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"user",
+						"appointment",
+						"healthcare",
+						"profile"
+					],
+					"query": [
+						{
+							"key": "healthcare_id",
+							"value": "{{healthcare_id}}"
+						},
+						{
+							"key": "healthcare_name",
+							"value": "Benjamin Schneider Hospital",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Get HealthCare Profile",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{Addr}}/api/v1/user/appointment/healthcare/profile?healthcare_id={{healthcare_id}}",
+							"host": [
+								"{{Addr}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"appointment",
+								"healthcare",
+								"profile"
+							],
+							"query": [
+								{
+									"key": "healthcare_id",
+									"value": "{{healthcare_id}}"
+								},
+								{
+									"key": "healthcare_name",
+									"value": "Benjamin Schneider Hospital",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx/1.27.2"
+						},
+						{
+							"key": "Date",
+							"value": "Sun, 17 Nov 2024 18:25:49 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Vary",
+							"value": "Accept-Encoding"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"1b1-vKvg3iSswmJVibaaoc8owVXD+54\""
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "gzip"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"healthcare_profile\": {\n        \"healthcare_name\": \"Pat Gaylord Hospital\",\n        \"healthcare_id\": \"HCID69d6e6cf-f071-4824-8\",\n        \"healthcare_license\": \"69d6e6cf-f071-4824-8\",\n        \"country\": \"Nigeria\",\n        \"state\": \"Lewisville\",\n        \"city\": \"North Janiyabury\",\n        \"landmark\": \"Tremblay Mountain\",\n        \"date_of_registration\": \"2024-11-17T18:12:07.737Z\",\n        \"email\": \"Asa.Breitenberg@gmail.com\",\n        \"availability\": \"Yes\",\n        \"total_facilities\": 200,\n        \"total_mbbs_doc\": 58,\n        \"no_of_beds\": 200,\n        \"about\": \"Human\"\n    }\n}"
 				}
 			]
 		}

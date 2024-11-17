@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
             unique: true,
         },
         view_permission: {
-            type: DataTypes.BOOLEAN,
+            type: DataTypes.BOOLEAN, 
             allowNull: false,
             defaultValue: true
         },
@@ -18,7 +18,6 @@ module.exports = (sequelize, DataTypes) => {
         email: {
             type: DataTypes.ENUM("Every Event", "Weekly", "Opt Out", "Monthly"),
             allowNull: false,
-            unique: true,
         }
     }, {
         tableName: 'patient_pref',

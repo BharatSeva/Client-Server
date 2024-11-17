@@ -15,7 +15,7 @@ const authentication = async (req, res, next) => {
         const patient_payload = jwt.verify(token, process.env.Patient_JWT_SECRET_KEY);
         req.user = {
             userID: patient_payload.Patient_USERID,
-            fullname: patient_payload.name,
+            fullname: patient_payload.fullname,
             health_id: patient_payload.healthId,
             email: patient_payload.email,
         };
