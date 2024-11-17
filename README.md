@@ -1,129 +1,153 @@
-  # Bharat Seva+ Client Portal [![Deploy to AzureVM](https://github.com/BharatSeva/User-Server/actions/workflows/deploy.yaml/badge.svg)](https://github.com/BharatSeva/User-Server/actions/workflows/deploy.yaml)
-  > Patient, Client, and User names are used interchangeably
+# Bharat Seva+ Client Portal 🚀  
+[![Deploy to AzureVM](https://github.com/BharatSeva/User-Server/actions/workflows/deploy.yaml/badge.svg)](https://github.com/BharatSeva/User-Server/actions/workflows/deploy.yaml)  
 
-  This repository hosts the **Client Portal Service** for the Bharat Seva+ project. This service manages Client-related functionalities, including **authentication, profile management, and permission handling**, all built with **Express.js**. It integrates with other Bharat Seva+ services, such as healthcare records and notifications, to provide a seamless experience for client.
+> **Note:** The terms *Patient*, *Client*, and *User* are used interchangeably throughout this organisation.  
 
-  ---
+Welcome to the **Bharat Seva+ Client Portal Service**! This service is the backbone of **Client Management** in the Bharat Seva+ project. From **authentication** and **profile management** to **permission handling**, the Client Portal integrates seamlessly with other services like healthcare records and notifications to deliver a unified, smooth experience for users.  
 
-  ## Table of Contents
+---
 
-  - [Features](#features)
-  - [Technologies Used](#technologies-used)
-  - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Clone the Repository](#clone-the-repository)
-    - [Install Dependencies](#install-dependencies)
-    - [Configure Environment Variables](#configure-environment-variables)
-    - [Run the Server](#run-the-server)
-  - [Docker Setup](#docker-setup)
-  - [API Endpoints](#api-endpoints)
-  - [Usage](#usage)
-  - [Contributing](#contributing)
-  - [License](#license)
+## Table of Contents  
+- [Features](#features)  
+- [Technologies Used](#technologies-used)  
+- [Getting Started](#getting-started)  
+  - [Prerequisites](#prerequisites)  
+  - [Clone the Repository](#clone-the-repository)  
+  - [Install Dependencies](#install-dependencies)  
+  - [Configure Environment Variables](#configure-environment-variables)  
+  - [Run the Server](#run-the-server)  
+- [Docker Setup](#docker-setup)  
+- [API Endpoints](#api-endpoints)  
+- [Usage](#usage)  
+- [Contributing](#contributing)  
+- [License](#license)  
 
-  ---
+---
 
-  ## Features
+## Features  
 
-  - Client authentication and authorization
-  - Appointment scheduling and management
-  - Healthcare preferences management
-  - Integration with RabbitMQ for appointment processing
-  - Rate limiting and caching for API requests
-  - MongoDB and PostgreSQL for Records and Appointment storage
+- **Secure Client Authentication and Authorization**:  
+  Enables users to securely log in and manage access to protected routes.  
 
-  ## Technologies Used
+- **Profile Management**:  
+  Allows users to update their profiles and preferences effortlessly.  
 
-  - **Node.js**: Server-side JavaScript runtime
-  - **Express.js**: Web framework for Node.js
-  - **PostgreSQL**: Relational database for user data
-  - **MongoDB**: NoSQL database for appointment records
-  - **RabbitMQ**: Message broker for handling appointment creation
-  - **Redis**: In-memory data structure store for rate limiting
-  - **JWT**: JSON Web Tokens for secure user authentication
+- **Appointment Scheduling and Management**:  
+  Handles the complete lifecycle of appointments, from booking to completion.  
 
-  ---
+- **Integration with RabbitMQ**:  
+  Asynchronous processing of appointments and tasks for enhanced performance.  
 
-  ## Getting Started
+- **Rate Limiting with Redis**:  
+  Protects against excessive API requests with efficient rate limiting and caching.  
 
-  ### Prerequisites
+- **Data Persistence**:  
+  - **PostgreSQL** for user data and sensitive information.  
+  - **MongoDB** for appointment and activity records.  
 
-  Ensure you have the following installed:
+---
 
-  - Node.js (version >= 16)
-  - PostgreSQL
-  - MongoDB
-  - RabbitMQ
-  - Redis
-  - Docker
-  - Python
+## Technologies Used  
 
-  ### Clone the Repository
+- **Node.js**: Server-side JavaScript runtime  
+- **Express.js**: Lightweight, flexible web framework  
+- **PostgreSQL**: Relational database for structured data  
+- **MongoDB**: NoSQL database for unstructured appointment records  
+- **RabbitMQ**: Message broker for task queuing  
+- **Redis**: In-memory datastore for caching and rate limiting  
+- **JWT (JSON Web Tokens)**: Secure authentication for users  
 
-  ```bash
-  git clone https://github.com/BharatSeva/User-Server.git
-  cd User-Server
-  ```
+---
 
-  ### Install Dependencies
-  ```bash
-  npm install
-  ```
-  ### Configure Environment Variables
-  Create a .env file in the root directory and add the following variables:
-  ```bash
-  PORT=3001   # THIS IS USER PORT
-  MONGOURL=mongodb://rootuser:rootuser@localhost:27017/db?authSource=admin 
-  Patient_JWT_LIFETIME=30d
-  Patient_JWT_SECRET_KEY=VaibhavYadav
+## Getting Started   
 
-  POSTGRES_HOST=localhost
-  POSTGRES_USER=rootuser
-  POSTGRES_PASS=rootuser
-  POSTGRES_PORT=5432
-  POSTGRES_DIALECT=postgres
+Follow the steps below to set up the Client Portal on your local system.  
 
-  MAX_REQUESTS=100
-  WINDOW_SIZE_IN_SECONDS=60
+### Prerequisites  
+Ensure the following dependencies are installed:  
+- **Node.js** (v16 or higher)  
+- **PostgreSQL**  
+- **MongoDB**  
+- **RabbitMQ**  
+- **Redis**  
+- **Docker**  
+- **Python**  
 
-  REDIS_HOST=localhost
-  REDIS_PORT=6379
+---
 
-  RABBITMQ_URL=amqp://rootuser:rootuser@localhost:5672/
-  ```
+### Clone the Repository  
 
-  ### Run the Server
-  ```bash
-  npm start
-  ```
-  The server will start at http://localhost:3001.
+```bash
+git clone https://github.com/BharatSeva/User-Server.git
+cd User-Server
+```
 
-  ### Docker Setup
-  You can run the User Service with Docker for easier setup and deployment.
 
-  Build the Docker Image:
+### Install Dependencies
+```bash
+npm install
+```
+### Configure Environment Variables
+Create a .env file in the project root directory and populate it with the following:
 
-  ```bash
-  docker build -t client .
-  ```
-  Run the Docker Container:
-  ```bash
-  docker run -d -p 3001:3001 --name client --env-file .env client
-  ```
-  This command will start the service on http://localhost:3001, reading environment variables from the .env file.
+```bash
+PORT=3001  # Port for the Client Portal  
+MONGOURL=mongodb://rootuser:rootuser@localhost:27017/db?authSource=admin  
 
-  ## API Endpoints
-  Detailed API documentation and request examples are available in the Postman Collection. Download it [here](./patient_server.postman_collection.json).
+Patient_JWT_LIFETIME=30d  
+Patient_JWT_SECRET_KEY=VaibhavYadavSECRET_KEY
 
-  ## Usage
-  To use the API, include the JWT token in the Authorization header for protected routes:
+POSTGRES_HOST=localhost  
+POSTGRES_USER=rootuser  
+POSTGRES_PASS=rootuser  
+POSTGRES_PORT=5432  
+POSTGRES_DIALECT=postgres  
 
-  ```bash
-  Authorization: Bearer <your_jwt_token>
-  ```
+MAX_REQUESTS=100  
+WINDOW_SIZE_IN_SECONDS=60  
 
-  ## Contributing
-  Contributions are welcome! Please create a pull request or open an issue for any feature requests or bug reports.
+REDIS_HOST=localhost  
+REDIS_PORT=6379  
 
-  ## License
-  This project is licensed - see the [LICENSE](./LICENSE) file for details.
+RABBITMQ_URL=amqp://rootuser:rootuser@localhost:5672/  
+```
+
+### Run the Server  
+To start the server locally:
+
+```bash
+npm start
+```
+The server will start at http://localhost:3001.
+
+## Docker Setup
+Build the Docker Image
+```bash
+docker build -t client .
+```
+
+Run the Docker Container
+```bash
+docker run -d -p 3001:3001 --name client --env-file .env client
+```
+This will start the service at http://localhost:3001 using environment variables from your .env file.
+
+## API Endpoints
+Detailed documentation for all API endpoints, including request and response formats, is available in the Postman collection.
+Download the collection [here](./client.postman_collection.json).
+
+## Usage 
+For secured routes, ensure to include the JWT token in the Authorization header of your API requests:
+
+```bash
+Authorization: Bearer <your_jwt_token>
+```
+## Contributing 
+Contributions are welcome! If you have ideas for new features or encounter bugs, feel free to:
+
+- Create a pull request  
+- Open an issue  
+Let’s build something amazing together!  
+
+## License 
+This project is licensed under the AGPL-3.0 License. For more details, see the [LICENSE](./LICENSE) file.
