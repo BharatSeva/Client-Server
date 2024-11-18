@@ -21,8 +21,8 @@ jobs:
         key: ${{ secrets.KEY }}
         script: |
           cd /home/azureuser/server
-          sudo rm -rf User-Server
-          git clone https://github.com/BharatSeva/User-Server.git
+          sudo rm -rf Client-Server
+          git clone https://github.com/BharatSeva/Client-Server.git
           sudo docker rm -f client_server || true
           sudo docker-compose up -d --build
 

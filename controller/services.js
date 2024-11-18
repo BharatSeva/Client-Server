@@ -10,16 +10,16 @@ const getprofile = async (req, res) => {
     const { health_id } = req.user;
     try {
         if (cache) {
-            const { cachedData, ttl } = await Getcaching('info', health_id)
+            const { cachedData, ttl } = await Getcaching('client_profile', health_id)
             if (cachedData) {
-                res.status(StatusCode.OK).json({ biodata: cachedData, refreshIn: ttl + "s" })
+                res.status(StatusCode.OK).json({ profile_data: cachedData, refreshIn: ttl + "s" })
                 return
             }
         }
         let query = { health_id };
         const clientprofile = await profile.findOne({ where: query })
         // set cache data
-        await Setcaching('info', health_id, clientprofile)
+        await Setcaching('client_profile', health_id, clientprofile)
 
         res.status(StatusCode.OK).json({ profile_data: clientprofile })
     } catch (error) {
