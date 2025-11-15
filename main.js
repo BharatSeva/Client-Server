@@ -29,10 +29,10 @@ const totalReqCounter = new client.Counter({
 // Middleware to record response time
 app.use(responsetime((req, res, time) => {
     // this will log request in .log file
-    const logEntry = `IP_ADDR: ${req.ip} | Time: ${new Date().toISOString()} | Method: ${req.method} | URL: ${req.url} | Status: ${res.statusCode} | Duration: ${time.toFixed(2)} ms\n`;
-    fs.appendFileSync(path.join(__dirname, 'req.log'), logEntry, (err) => {
-        if (err) console.error("Error logging request duration:", err);
-    });
+    // const logEntry = `IP_ADDR: ${req.ip} | Time: ${new Date().toISOString()} | Method: ${req.method} | URL: ${req.url} | Status: ${res.statusCode} | Duration: ${time.toFixed(2)} ms\n`;
+    // fs.appendFileSync(path.join(__dirname, 'req.log'), logEntry, (err) => {
+    //     if (err) console.error("Error logging request duration:", err);
+    // });
 
     totalReqCounter.labels({ route: req.url }).inc();
     ReqResTime.labels({
@@ -82,4 +82,4 @@ const start = async () => {
         console.log("Something Went Wrong, Message: ", error.message)
     }
 }
-start();  
+start();   
